@@ -6,7 +6,7 @@
 
 فایل report.php را باز کرده و به جای database_password رمز عبور دیتابیس ایزابل خود را وارد کنید
 
-در مرورگر آدرس زیرار باز کنید :
+در مرورگر :
 
 https://<you_ip_server>/record/monitoring.php
 
