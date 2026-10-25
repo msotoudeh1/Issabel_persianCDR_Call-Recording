@@ -11,8 +11,6 @@ database_password
 
 https://<you_ip_server>/record/monitoring.php
 
-https://<your_ip_server>/record/reports.php
-
 
 
 <img width="1201" height="886" alt="image" src="https://github.com/user-attachments/assets/bff30220-d0ba-4da8-8970-26ba1b531b5f" />
