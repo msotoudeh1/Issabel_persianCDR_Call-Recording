@@ -8,7 +8,7 @@
 
 در مرورگر آدرس زیرار باز کنید :
 
-https://<you_ip_server>:/record/monitoring.php
+https://<you_ip_server>/record/monitoring.php
 
 https://<your_ip_server>/record/report.php
 
