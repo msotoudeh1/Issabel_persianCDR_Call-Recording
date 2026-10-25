@@ -21,7 +21,8 @@ https://<your_ip_server>/record/reports.php
 
 <img width="624" height="789" alt="image" src="https://github.com/user-attachments/assets/edd68fd7-801a-462b-a3f3-ab743d59a829" />
 
-<img width="1155" height="395" alt="image" src="https://github.com/user-attachments/assets/5bfcfa1e-0fc9-4eac-9e2c-c86abd6380ce" />
+<img width="1129" height="662" alt="image" src="https://github.com/user-attachments/assets/6ff8c5b4-4c84-4b0a-a0a3-b3ed0b854603" />
+
 
 
 
