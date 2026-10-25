@@ -11,7 +11,7 @@ database_password
 
 https://<you_ip_server>/record/monitoring.php
 
-https://<your_ip_server>/record/report.php
+https://<your_ip_server>/record/reports.php
 
 
 
