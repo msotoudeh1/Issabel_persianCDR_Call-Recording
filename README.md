@@ -14,5 +14,6 @@ https://<your_ip_server>/record/report.php
 
 <img width="1220" height="886" alt="image" src="https://github.com/user-attachments/assets/92f7305f-a242-4285-987b-b6d44cb5e2ac" />
 
-<img width="1160" height="858" alt="image" src="https://github.com/user-attachments/assets/ac55ccaa-c2b4-4e46-9e8a-899fb14b4227" />
+<img width="1160" height="860" alt="image" src="https://github.com/user-attachments/assets/51366040-fd4a-4ecc-82d4-0769c16c559a" />
+
 
