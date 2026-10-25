@@ -6,6 +6,9 @@
 
 database_password
 
+در صورتی که فایلهای مکالمات فراخوانی نشدن در محیط cli به پوشه monitor دسترسی بدید :
+
+chmod -R o+r /var/spool/asterisk/monitor
 
 در مرورگر :
 
