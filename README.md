@@ -16,13 +16,14 @@ https://<you_ip_server>/record/monitoring.php
 
 
 
-<img width="1201" height="886" alt="image" src="https://github.com/user-attachments/assets/bff30220-d0ba-4da8-8970-26ba1b531b5f" />
+<img width="1439" height="825" alt="image" src="https://github.com/user-attachments/assets/a9246dd6-6bf5-4277-aee9-39053a970474" />
 
-<img width="1180" height="892" alt="image" src="https://github.com/user-attachments/assets/3b5ae23b-3a1f-4d60-bef0-f92f43ce9eab" />
+<img width="1322" height="812" alt="image" src="https://github.com/user-attachments/assets/276f2c03-5cb6-411b-8d98-4fd14dea79a6" />
 
-<img width="624" height="789" alt="image" src="https://github.com/user-attachments/assets/edd68fd7-801a-462b-a3f3-ab743d59a829" />
+<img width="1350" height="867" alt="image" src="https://github.com/user-attachments/assets/f1c51b8f-0f2c-42ce-9343-2d0b5e42cc67" />
 
-<img width="1129" height="662" alt="image" src="https://github.com/user-attachments/assets/6ff8c5b4-4c84-4b0a-a0a3-b3ed0b854603" />
+<img width="645" height="803" alt="image" src="https://github.com/user-attachments/assets/0c3f8bba-8444-4b80-a90a-74fb0e72fdf7" />
+
 
 
 
