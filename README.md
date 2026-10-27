@@ -16,7 +16,7 @@ chmod -R o+r /var/spool/asterisk/monitor
 ```
 در مرورگر :
 ```
-https://<you_ip_server>/record/monitoring.php
+https://<ip_server>/record/monitoring.php
 ```
 
 
