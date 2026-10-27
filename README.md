@@ -6,17 +6,17 @@
 ```
 
 
-2- فایل config.php را باز کرده و رمز دیتابیس خود را وارد کنید :
+2- فایل config.php موجود در پوشه record را باز کرده و رمز دیتابیس خود را وارد کنید :
 
 database_password
 
-3- در صورتی که فایلهای مکالمات فراخوانی نشدن در محیط cli به پوشه monitor دسترسی بدید :
+3- در صورتی که فایلهای مکالمات فراخوانی نشدن ،  در محیط cli به پوشه monitor دسترسی بدید :
 ```
 chmod -R o+r /var/spool/asterisk/monitor
 ```
-در مرورگر :
+در نهایت در مرورگر ادرس زیر را وارد کنید : 
 ```
-https://<ip_server>/record/monitoring.php
+https://<Issabel_IP>/record/monitoring.php
 ```
 
 
