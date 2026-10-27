@@ -19,14 +19,11 @@ chmod -R o+r /var/spool/asterisk/monitor
 https://<you_ip_server>/record/monitoring.php
 
 
+<img width="1360" height="2371" alt="1" src="https://github.com/user-attachments/assets/002fdd9b-5d30-427a-b809-f192fa253426" />
 
-<img width="1439" height="825" alt="image" src="https://github.com/user-attachments/assets/a9246dd6-6bf5-4277-aee9-39053a970474" />
+<img width="1360" height="2164" alt="2" src="https://github.com/user-attachments/assets/dfa12efa-e1f3-449c-89ea-893ed6e9eee8" />
 
-<img width="1322" height="812" alt="image" src="https://github.com/user-attachments/assets/276f2c03-5cb6-411b-8d98-4fd14dea79a6" />
 
-<img width="1350" height="867" alt="image" src="https://github.com/user-attachments/assets/f1c51b8f-0f2c-42ce-9343-2d0b5e42cc67" />
-
-<img width="645" height="803" alt="image" src="https://github.com/user-attachments/assets/0c3f8bba-8444-4b80-a90a-74fb0e72fdf7" />
 
 
 
