@@ -256,7 +256,7 @@ $disp_labels = array(
     'NO ANSWER'  => 'بدون پاسخ',
     'BUSY'       => 'مشغول',
     'FAILED'     => 'ناموفق',
-    'CONGESTION' => 'ترافیک',
+    'CONGESTION' => 'مشغول',
     'CANCEL'     => 'لغو شده',
 );
 
