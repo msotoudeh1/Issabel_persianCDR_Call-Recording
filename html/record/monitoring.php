@@ -787,7 +787,7 @@ html.dark .theme-knob .icon-moon {
         'NO ANSWER'  => 'بدون پاسخ',
         'BUSY'       => 'مشغول',
         'FAILED'     => 'ناموفق',
-        'CONGESTION' => 'ازدحام',
+        'CONGESTION' => 'مشغول',
         'CANCEL'     => 'لغو شده',
         'UNKNOWN'    => 'نامشخص'
     );
