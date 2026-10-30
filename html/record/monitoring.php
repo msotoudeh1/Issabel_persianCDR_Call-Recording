@@ -579,60 +579,124 @@ html.dark .theme-knob .icon-moon {
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
 
-    <!-- هدر -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-        <div class="absolute -left-10 -top-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl pointer-events-none"></div>
+     <!-- هدر -->
+<div class="relative mb-8">
+    <!-- ۱. لایه پس‌زمینه -->
+    <div class="absolute inset-0 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden pointer-events-none transition-colors duration-300">
+        <div class="absolute -left-10 -top-10 w-40 h-40 bg-emerald-50 dark:bg-emerald-900/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- ۲. لایه محتوا -->
+    <div class="relative z-10 p-5 md:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         
         <!-- بخش عنوان -->
         <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold mb-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 پنل آنالیز و شنود
             </div>
-            <h1 class="text-3xl font-black text-slate-800">
+            <h1 class="text-2xl md:text-3xl font-black text-slate-800 dark:text-white">
                 داشبورد مکالمات
             </h1>
-            <p class="text-slate-500 text-sm mt-1">نمودارهای تحلیلی، عملکرد اپراتورها و شنود مکالمات</p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">نمودارهای تحلیلی، عملکرد اپراتورها و شنود مکالمات</p>
         </div>
 
-<!-- بخش اکشن‌ها و ساعت -->
-<div class="flex flex-col sm:flex-row items-center gap-4">
+        <!-- بخش اکشن‌ها و ساعت -->
+        <div class="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
 
-    <!-- ویجت ساعت و تاریخ -->
-    <div class="flex items-center gap-3 bg-gradient-to-l from-slate-50 to-white border border-slate-200 rounded-xl px-4 h-14 shadow-sm w-full sm:w-auto">
-        <div class="flex flex-col items-end">
-            <span class="text-xs text-slate-500 font-medium">امروز: <?php echo $today_jalali_fa; ?></span>
-            <span id="live-clock" class="text-2xl font-black text-emerald-600 tracking-wider dir-ltr text-left mt-0.5" style="font-variant-numeric: tabular-nums;">۰۰:۰۰:۰۰</span>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <!-- ویجت ساعت و تاریخ (کامپکت‌تر) -->
+            <div class="flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 h-11 shadow-sm w-full sm:w-auto">
+                <div class="flex flex-col items-end justify-center">
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-none mb-1">امروز: <?php echo $today_jalali_fa; ?></span>
+                    <span id="live-clock" class="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-wider leading-none dir-ltr text-left" style="font-variant-numeric: tabular-nums;">۰۰:۰۰:۰۰</span>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+            </div>
+
+            <!-- دکمه گزارشات -->
+            <a href="reports.php" class="inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 px-4 h-11 rounded-xl text-sm font-medium transition shadow-sm w-full sm:w-auto">
+                <svg class="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h4m0 0l-3-3m3 3l-3 3M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                بخش گزارش مکالمات
+            </a>
+
+            <!-- منوی همبرگری -->
+            <div class="relative w-full sm:w-auto">
+                <!-- اضافه شدن کلاس group برای اعمال هاور روی فرزند (آیکن) -->
+                <button type="button" onclick="toggleDropdown()" title="منو" class="group w-full sm:w-11 h-11 flex items-center justify-center bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded-xl transition-colors shadow-sm">
+                    <!-- اضافه شدن transition و group-hover:rotate-90 برای چرخش -->
+                    <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+
+                <!-- محتوای منوی کشویی -->
+                <div id="hamburger-menu" class="hidden absolute left-0 mt-2 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-2 z-50">
+                    
+                    <!-- دکمه تغییر تم -->
+                    <button type="button" onclick="toggleThemeInMenu()" class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <svg id="theme-icon-sun" class="w-4 h-4 text-amber-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                            <svg id="theme-icon-moon" class="w-4 h-4 text-indigo-500 dark:text-indigo-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                            <span>تغییر تم</span>
+                        </div>
+                        <div class="w-8 h-4 bg-slate-200 dark:bg-slate-600 rounded-full relative transition-colors">
+                            <div class="absolute top-0.5 right-0.5 w-3 h-3 bg-white rounded-full transition-transform dark:-translate-x-4"></div>
+                        </div>
+                    </button>
+
+                    <div class="border-t border-slate-100 dark:border-slate-700 my-1"></div>
+
+                    <!-- دکمه خروج -->
+                    <a href="/index.php?logout=yes" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        خروج از حساب
+                    </a>
+                </div>
+            </div>
+            
         </div>
     </div>
-
-    <!-- دکمه گزارشات -->
-    <a href="reports.php" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-4 h-14 rounded-xl text-sm font-medium transition shadow-sm w-full sm:w-auto">
-        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h4m0 0l-3-3m3 3l-3 3M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-        بخش گزارش مکالمات
-    </a>
-
-<!-- دکمه تغییر تم (سوئیچ) -->
-<button type="button" id="theme-toggle" title="تغییر تم" aria-label="تغییر تم"
-        class="theme-toggle w-full sm:w-auto">
-    <span class="theme-track">
-        <span class="theme-knob">
-            <svg class="icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <svg class="icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
-        </span>
-    </span>
-</button>
 </div>
-    </div>
+
+<!-- اسکریپت‌های مربوط به منو و تغییر تم -->
+<script>
+    function toggleDropdown() {
+        const menu = document.getElementById('hamburger-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('hamburger-menu');
+        const button = event.target.closest('button[onclick="toggleDropdown()"]');
+        if (!button && !menu.contains(event.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    function toggleThemeInMenu() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateThemeIcons();
+    }
+
+    function updateThemeIcons() {
+        const isDark = document.documentElement.classList.contains('dark');
+        const sunIcon = document.getElementById('theme-icon-sun');
+        const moonIcon = document.getElementById('theme-icon-moon');
+        
+        if (isDark) {
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        } else {
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+    }
+
+    updateThemeIcons();
+</script>
 
     <!-- بخش نمودارها -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
