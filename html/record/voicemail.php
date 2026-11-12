@@ -350,7 +350,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
             </div>
 
             <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-right border-collapse min-w-[760px]">
+                <table class="w-full text-right border-collapse min-w-[860px]">
                     <thead>
                         <tr class="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
                             <th class="py-4 px-5">داخلی</th>
@@ -358,7 +358,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                             <th class="py-4 px-4">تاریخ و زمان دریافت</th>
                             <th class="py-4 px-4">مدت پیام</th>
                             <th class="py-4 px-4">پوشه / وضعیت</th>
-                            <th class="py-4 px-5 text-center">شنود و دانلود پیام صوتی</th>
+                            <th class="py-4 px-5 text-center min-w-[280px]">شنود و دانلود پیام صوتی</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-sm">
@@ -406,7 +406,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                             <td class="py-4 px-5">
                                 <?php if ($vm['has_audio']): ?>
                                     <div class="flex items-center justify-center">
-                                        <?php echo render_smart_audio_player($audio_url, $download_url, '', 'purple', 'w-64 sm:w-72'); ?>
+                                        <?php echo render_smart_audio_player($audio_url, $download_url, '', 'purple', 'w-64 sm:w-80', $vm['duration']); ?>
                                     </div>
                                 <?php else: ?>
                                     <div class="text-center text-xs text-slate-400">فایل صوتی یافت نشد</div>

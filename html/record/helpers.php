@@ -558,30 +558,30 @@ function scan_asterisk_voicemails($voicemail_dir) {
 }
 
 /**
- * ساخت کامپوننت پلیر هوشمند و ریسپانسیو صوتی با کنترل لودبار، جلو/عقب و سرعت پخش
+ * ساخت کامپوننت پلیر هوشمند و مینیمال صوتی با کنترل لودبار، اسکراب نرم عقب/جلو و طراحی مدرن
  */
-function render_smart_audio_player($src, $download_url = '', $extra_html = '', $color = 'emerald', $width_class = 'w-64 sm:w-72') {
+function render_smart_audio_player($src, $download_url = '', $extra_html = '', $color = 'emerald', $width_class = 'w-64 sm:w-80', $duration_sec = 0) {
     if (empty($src)) {
         return '<span class="inline-block text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-3 py-1 rounded-xl">فاقد فایل ضبط</span>';
     }
 
     $color_classes = array(
         'emerald' => array(
-            'btn'      => 'bg-emerald-500 hover:bg-emerald-600',
+            'btn'      => 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 shadow-emerald-500/25 hover:shadow-emerald-500/40',
             'gradient' => 'from-emerald-500 to-teal-400',
-            'thumb'    => 'border-emerald-500',
+            'thumb'    => 'border-emerald-500 ring-emerald-500/20',
             'hover_bg' => 'hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600 dark:hover:text-emerald-400',
         ),
         'purple' => array(
-            'btn'      => 'bg-purple-600 hover:bg-purple-700',
+            'btn'      => 'bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 shadow-purple-500/25 hover:shadow-purple-500/40',
             'gradient' => 'from-purple-600 to-indigo-500',
-            'thumb'    => 'border-purple-600',
+            'thumb'    => 'border-purple-600 ring-purple-600/20',
             'hover_bg' => 'hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400',
         ),
         'blue' => array(
-            'btn'      => 'bg-blue-600 hover:bg-blue-700',
+            'btn'      => 'bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-500 shadow-blue-500/25 hover:shadow-blue-500/40',
             'gradient' => 'from-blue-600 to-cyan-500',
-            'thumb'    => 'border-blue-600',
+            'thumb'    => 'border-blue-600 ring-blue-600/20',
             'hover_bg' => 'hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400',
         )
     );
@@ -589,59 +589,55 @@ function render_smart_audio_player($src, $download_url = '', $extra_html = '', $
     $cfg = isset($color_classes[$color]) ? $color_classes[$color] : $color_classes['emerald'];
     $dl_link = !empty($download_url) ? $download_url : ($src . (strpos($src, '?') !== false ? '&download=1' : '?download=1'));
 
+    $dur_str = '--:--';
+    if ($duration_sec > 0) {
+        $m = floor($duration_sec / 60);
+        $s = $duration_sec % 60;
+        $dur_str = sprintf('%02d:%02d', $m, $s);
+    }
+
     ob_start();
     ?>
-    <div class="smart-audio-player flex items-center gap-1.5 sm:gap-2 bg-slate-100/90 dark:bg-slate-800/80 px-2 sm:px-2.5 py-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 <?php echo $width_class; ?> max-w-full shadow-sm select-none" data-src="<?php echo htmlspecialchars($src); ?>">
+    <div class="smart-audio-player flex items-center gap-2.5 sm:gap-3 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 px-3 py-2 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 <?php echo $width_class; ?> max-w-full shadow-sm transition-all duration-200 select-none" dir="ltr" data-src="<?php echo htmlspecialchars($src); ?>" data-duration="<?php echo (int)$duration_sec; ?>">
         
-        <!-- دکمه پخش / مکث -->
-        <button type="button" class="sap-play-btn w-8 h-8 rounded-xl <?php echo $cfg['btn']; ?> text-white flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-sm" title="پخش / توقف">
-            <svg class="sap-play-icon w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <!-- تگ صوتی بومی مجزا برای هر ردیف بدون تداخل و بدون مسدود شدن سشن -->
+        <audio class="sap-audio-native" preload="none" src="<?php echo htmlspecialchars($src); ?>"></audio>
+
+        <!-- دکمه گرد و ارگونومیک پخش / توقف -->
+        <button type="button" class="sap-play-btn w-9 h-9 rounded-full <?php echo $cfg['btn']; ?> text-white flex items-center justify-center shrink-0 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer focus:outline-none" title="پخش / توقف">
+            <svg class="sap-play-icon w-4 h-4 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             <svg class="sap-pause-icon w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             <svg class="sap-spin-icon w-4 h-4 hidden animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
         </button>
 
-        <!-- دکمه 5 ثانیه به عقب -->
-        <button type="button" class="sap-skip-back w-6 sm:w-7 h-6 sm:h-7 rounded-lg text-slate-500 dark:text-slate-400 <?php echo $cfg['hover_bg']; ?> hover:bg-white dark:hover:bg-slate-700/60 flex items-center justify-center shrink-0 transition" title="5 ثانیه به عقب">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>
-        </button>
-
-        <!-- نوار اسکراب و لودبار (همیشه LTR برای دقت و جهت استاندارد ماوس) -->
-        <div class="flex-1 min-w-0 flex flex-col justify-center">
-            <div class="sap-seek-track w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full cursor-pointer relative overflow-visible select-none group" dir="ltr" title="کلیک یا درگ برای عقب و جلو کردن">
-                <!-- نوار بافر دانلود شده سرور -->
+        <!-- نوار اسکراب و لودبار عریض با قابلیت عقب و جلو کردن نرم -->
+        <div class="flex-1 min-w-[110px] flex flex-col justify-center py-0.5 select-none">
+            <div class="sap-seek-track w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full cursor-pointer relative overflow-visible group" title="کلیک یا درگ برای عقب و جلو کردن صدا">
+                <!-- نوار بافر شبکه -->
                 <div class="sap-buffer-fill bg-slate-300 dark:bg-slate-600 h-full rounded-full absolute left-0 top-0 transition-all pointer-events-none" style="width: 0%"></div>
                 <!-- نوار پیشرفت پخش -->
                 <div class="sap-progress-fill bg-gradient-to-r <?php echo $cfg['gradient']; ?> h-full rounded-full absolute left-0 top-0 pointer-events-none" style="width: 0%"></div>
-                <!-- دستگیره متحرک لودبار -->
+                <!-- دستگیره متحرک اسکراب -->
                 <div class="sap-scrub-thumb w-3.5 h-3.5 bg-white dark:bg-slate-100 shadow border-2 <?php echo $cfg['thumb']; ?> rounded-full absolute top-1/2 -translate-y-1/2 -ml-1.5 transition-transform pointer-events-none group-hover:scale-125" style="left: 0%"></div>
             </div>
             
-            <!-- زمان سپری شده و کل زمان مکالمه -->
-            <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono mt-1 select-none" dir="ltr">
+            <!-- زمان سپری شده و کل زمان مکالمه با ارقام لاتین استاندارد -->
+            <div class="flex justify-between items-center text-[10px] sm:text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1 select-none">
                 <span class="sap-time-current">00:00</span>
-                <span class="sap-time-duration">--:--</span>
+                <span class="sap-time-duration"><?php echo $dur_str; ?></span>
             </div>
         </div>
 
-        <!-- دکمه 5 ثانیه به جلو -->
-        <button type="button" class="sap-skip-fwd w-6 sm:w-7 h-6 sm:h-7 rounded-lg text-slate-500 dark:text-slate-400 <?php echo $cfg['hover_bg']; ?> hover:bg-white dark:hover:bg-slate-700/60 flex items-center justify-center shrink-0 transition" title="5 ثانیه به جلو">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.934 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 005 8v8a1 1 0 001.6.8l5.334-4zM19.934 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.334-4z"/></svg>
-        </button>
+        <!-- دکمه‌های کنترلی سمت راست (دانلود و امکانات اختیاری) -->
+        <div class="flex items-center gap-1.5 shrink-0">
+            <?php if (!empty($dl_link)): ?>
+                <a href="<?php echo htmlspecialchars($dl_link); ?>" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-700/70 <?php echo $cfg['hover_bg']; ?> text-slate-600 dark:text-slate-300 flex items-center justify-center transition shadow-xs" title="دانلود فایل صوتی" download>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                </a>
+            <?php endif; ?>
 
-        <!-- دکمه تغییر سرعت پخش -->
-        <button type="button" class="sap-speed-btn h-6 sm:h-7 px-1.5 rounded-lg bg-white/70 dark:bg-slate-700/60 <?php echo $cfg['hover_bg']; ?> text-slate-600 dark:text-slate-300 text-[10px] font-bold font-mono shrink-0 transition" title="سرعت پخش (1x, 1.25x, 1.5x, 2x)">
-            1x
-        </button>
-
-        <!-- دکمه دانلود فایل -->
-        <?php if (!empty($dl_link)): ?>
-            <a href="<?php echo htmlspecialchars($dl_link); ?>" class="w-6 sm:w-7 h-6 sm:h-7 rounded-lg bg-white/70 dark:bg-slate-700/60 <?php echo $cfg['hover_bg']; ?> text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 transition" title="دانلود فایل صوتی">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            </a>
-        <?php endif; ?>
-
-        <!-- دکمه‌های اختیاری بیشتر (مانند مودال فنی) -->
-        <?php if (!empty($extra_html)) echo $extra_html; ?>
+            <?php if (!empty($extra_html)) echo $extra_html; ?>
+        </div>
 
     </div>
     <?php
@@ -947,320 +943,226 @@ function render_app_header($active_tab = 'monitoring') {
             }
         });
 
-        // موتور جامع پلیر صوتی هوشمند مبتنی بر رویدادهای سراسری (Event Delegation) و تک پلیر مرکزی
+        // موتور جامع و پایدار پلیرهای صوتی با قابلیت کنترل لودبار، اسکراب نرم عقب و جلو، و مدیریت همزمانی
         (function() {
-            var audio = new Audio();
-            var activePlayer = null;
-            var activeSrc = null;
-            var isDragging = false;
-            var speeds = [1, 1.25, 1.5, 2];
-            var currentSpeedIdx = 0;
-
             function formatTime(sec) {
-                var s = Math.floor(sec || 0);
+                if (!sec || isNaN(sec) || sec < 0) return '00:00';
+                var s = Math.floor(sec);
                 var m = Math.floor(s / 60);
                 s = s % 60;
                 return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
             }
 
-            function setPlayerState(player, isPlaying, isBuffering) {
-                if (!player) return;
+            function setupPlayer(player) {
+                if (player.__sap_ready) return;
+                player.__sap_ready = true;
+
+                var audio = player.querySelector('.sap-audio-native');
+                var playBtn = player.querySelector('.sap-play-btn');
+                var track = player.querySelector('.sap-seek-track');
+                var pFill = player.querySelector('.sap-progress-fill');
+                var bFill = player.querySelector('.sap-buffer-fill');
+                var thumb = player.querySelector('.sap-scrub-thumb');
+                var timeCur = player.querySelector('.sap-time-current');
+                var timeDur = player.querySelector('.sap-time-duration');
                 var playIcon = player.querySelector('.sap-play-icon');
                 var pauseIcon = player.querySelector('.sap-pause-icon');
                 var spinIcon = player.querySelector('.sap-spin-icon');
+                var isDragging = false;
 
-                if (isBuffering) {
-                    if (spinIcon) spinIcon.classList.remove('hidden');
-                    if (playIcon) playIcon.classList.add('hidden');
-                    if (pauseIcon) pauseIcon.classList.add('hidden');
-                } else if (isPlaying) {
-                    if (spinIcon) spinIcon.classList.add('hidden');
-                    if (playIcon) playIcon.classList.add('hidden');
-                    if (pauseIcon) pauseIcon.classList.remove('hidden');
-                } else {
-                    if (spinIcon) spinIcon.classList.add('hidden');
-                    if (playIcon) playIcon.classList.remove('hidden');
-                    if (pauseIcon) pauseIcon.classList.add('hidden');
+                if (!audio || !playBtn || !track) return;
+
+                function getDuration() {
+                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration) && audio.duration > 0) {
+                        return audio.duration;
+                    }
+                    var attrDur = parseFloat(player.getAttribute('data-duration') || '0');
+                    if (attrDur > 0) return attrDur;
+                    return 0;
                 }
-            }
 
-            function resetPlayerUI(player) {
-                if (!player) return;
-                setPlayerState(player, false, false);
-                var pFill = player.querySelector('.sap-progress-fill');
-                var thumb = player.querySelector('.sap-scrub-thumb');
-                var timeCur = player.querySelector('.sap-time-current');
-                if (pFill) pFill.style.width = '0%';
-                if (thumb) thumb.style.left = '0%';
-                if (timeCur) timeCur.textContent = '00:00';
-            }
-
-            // رویدادهای هسته Audio
-            audio.addEventListener('loadedmetadata', function() {
-                if (activePlayer && audio.duration) {
-                    var timeDur = activePlayer.querySelector('.sap-time-duration');
-                    if (timeDur) timeDur.textContent = formatTime(audio.duration);
-                }
-            });
-
-            audio.addEventListener('durationchange', function() {
-                if (activePlayer && audio.duration) {
-                    var timeDur = activePlayer.querySelector('.sap-time-duration');
-                    if (timeDur) timeDur.textContent = formatTime(audio.duration);
-                }
-            });
-
-            audio.addEventListener('progress', function() {
-                if (activePlayer && audio.buffered.length > 0 && audio.duration) {
-                    var bufferFill = activePlayer.querySelector('.sap-buffer-fill');
-                    if (bufferFill) {
-                        var bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
-                        var pct = Math.min(100, (bufferedEnd / audio.duration) * 100);
-                        bufferFill.style.width = pct + '%';
+                function setBtnState(state) {
+                    // state: 'playing' | 'paused' | 'loading'
+                    if (!playIcon || !pauseIcon || !spinIcon) return;
+                    if (state === 'loading') {
+                        spinIcon.classList.remove('hidden');
+                        playIcon.classList.add('hidden');
+                        pauseIcon.classList.add('hidden');
+                    } else if (state === 'playing') {
+                        spinIcon.classList.add('hidden');
+                        playIcon.classList.add('hidden');
+                        pauseIcon.classList.remove('hidden');
+                    } else {
+                        spinIcon.classList.add('hidden');
+                        playIcon.classList.remove('hidden');
+                        pauseIcon.classList.add('hidden');
                     }
                 }
-            });
 
-            audio.addEventListener('waiting', function() {
-                setPlayerState(activePlayer, false, true);
-            });
-
-            audio.addEventListener('playing', function() {
-                setPlayerState(activePlayer, true, false);
-            });
-
-            audio.addEventListener('pause', function() {
-                setPlayerState(activePlayer, false, false);
-            });
-
-            audio.addEventListener('timeupdate', function() {
-                if (!isDragging && activePlayer && audio.duration) {
-                    var pFill = activePlayer.querySelector('.sap-progress-fill');
-                    var thumb = activePlayer.querySelector('.sap-scrub-thumb');
-                    var timeCur = activePlayer.querySelector('.sap-time-current');
-                    var pct = Math.max(0, Math.min(100, (audio.currentTime / audio.duration) * 100));
-                    if (pFill) pFill.style.width = pct + '%';
-                    if (thumb) thumb.style.left = pct + '%';
-                    if (timeCur) timeCur.textContent = formatTime(audio.currentTime);
+                function updateProgress(curr, dur) {
+                    if (dur > 0) {
+                        var pct = Math.max(0, Math.min(100, (curr / dur) * 100));
+                        if (pFill) pFill.style.width = pct + '%';
+                        if (thumb) thumb.style.left = pct + '%';
+                    }
+                    if (timeCur) timeCur.textContent = formatTime(curr);
                 }
-            });
 
-            audio.addEventListener('ended', function() {
-                resetPlayerUI(activePlayer);
-                activePlayer = null;
-                activeSrc = null;
-            });
-
-            audio.addEventListener('error', function(err) {
-                console.error('Audio error:', err);
-                if (activePlayer) {
-                    setPlayerState(activePlayer, false, false);
-                    var timeCur = activePlayer.querySelector('.sap-time-current');
-                    if (timeCur) timeCur.textContent = 'خطا';
-                }
-            });
-
-            // مدیریت کلیک با Event Delegation سراسری
-            document.addEventListener('click', function(e) {
-                // ۱. دکمه پخش / مکث
-                var playBtn = e.target.closest('.sap-play-btn');
-                if (playBtn) {
+                // پخش صدا و توقف سایر فایل‌های صوتی صفحه
+                playBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    var player = playBtn.closest('.smart-audio-player');
-                    if (!player) return;
-                    var src = player.getAttribute('data-src');
-                    if (!src) return;
 
-                    // اگر روی همان ردیف کلیک شده
-                    if (activePlayer === player && activeSrc === src) {
-                        if (audio.paused) {
-                            audio.play().catch(function(err) {
-                                console.error('Play error:', err);
+                    if (audio.paused) {
+                        // متوقف ساختن تمام پلیرهای دیگر روی صفحه
+                        document.querySelectorAll('.sap-audio-native').forEach(function(other) {
+                            if (other !== audio && !other.paused) {
+                                other.pause();
+                            }
+                        });
+
+                        setBtnState('loading');
+                        var playPromise = audio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(function() {
+                                setBtnState('playing');
+                            }).catch(function(err) {
+                                console.error('Play failed:', err);
+                                setBtnState('paused');
                             });
-                        } else {
-                            audio.pause();
                         }
                     } else {
-                        // پخش فایل جدید (ابتدا فایل قبلی ریست شود)
-                        if (activePlayer && activePlayer !== player) {
-                            audio.pause();
-                            resetPlayerUI(activePlayer);
-                        }
-
-                        activePlayer = player;
-                        activeSrc = src;
-                        audio.src = src;
-                        audio.playbackRate = speeds[currentSpeedIdx];
-                        setPlayerState(player, false, true);
-
-                        audio.play().then(function() {
-                            setPlayerState(player, true, false);
-                        }).catch(function(err) {
-                            console.error('Play error:', err);
-                            setPlayerState(player, false, false);
-                        });
-                    }
-                    return;
-                }
-
-                // ۲. دکمه ۵ ثانیه به عقب
-                var skipBackBtn = e.target.closest('.sap-skip-back');
-                if (skipBackBtn) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var player = skipBackBtn.closest('.smart-audio-player');
-                    if (player && activePlayer === player) {
-                        audio.currentTime = Math.max(0, audio.currentTime - 5);
-                    }
-                    return;
-                }
-
-                // ۳. دکمه ۵ ثانیه به جلو
-                var skipFwdBtn = e.target.closest('.sap-skip-fwd');
-                if (skipFwdBtn) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var player = skipFwdBtn.closest('.smart-audio-player');
-                    if (player && activePlayer === player) {
-                        if (audio.duration) {
-                            audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
-                        } else {
-                            audio.currentTime += 5;
-                        }
-                    }
-                    return;
-                }
-
-                // ۴. دکمه تغییر سرعت پخش
-                var speedBtn = e.target.closest('.sap-speed-btn');
-                if (speedBtn) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    currentSpeedIdx = (currentSpeedIdx + 1) % speeds.length;
-                    var rate = speeds[currentSpeedIdx];
-                    audio.playbackRate = rate;
-                    document.querySelectorAll('.sap-speed-btn').forEach(function(sb) {
-                        sb.textContent = rate + 'x';
-                    });
-                    return;
-                }
-            });
-
-            // ۵. درگ و اسکراب روی لودبار
-            function getScrubPct(track, clientX) {
-                var rect = track.getBoundingClientRect();
-                return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-            }
-
-            var draggingTrack = null;
-            var draggingPlayer = null;
-
-            function onDragMove(e) {
-                if (!isDragging || !draggingTrack || !draggingPlayer) return;
-                var clientX = e.clientX;
-                if (e.touches && e.touches.length > 0) clientX = e.touches[0].clientX;
-                var pct = getScrubPct(draggingTrack, clientX);
-
-                var pFill = draggingPlayer.querySelector('.sap-progress-fill');
-                var thumb = draggingPlayer.querySelector('.sap-scrub-thumb');
-                var timeCur = draggingPlayer.querySelector('.sap-time-current');
-
-                if (pFill) pFill.style.width = (pct * 100) + '%';
-                if (thumb) thumb.style.left = (pct * 100) + '%';
-                if (timeCur && audio.duration) {
-                    timeCur.textContent = formatTime(pct * audio.duration);
-                }
-            }
-
-            function onDragEnd(e) {
-                if (!isDragging) return;
-                isDragging = false;
-                if (draggingTrack && draggingPlayer) {
-                    var clientX = e.clientX;
-                    if (e.changedTouches && e.changedTouches.length > 0) clientX = e.changedTouches[0].clientX;
-                    var pct = getScrubPct(draggingTrack, clientX);
-
-                    if (activePlayer === draggingPlayer && audio.duration) {
-                        audio.currentTime = pct * audio.duration;
-                    }
-                }
-                draggingTrack = null;
-                draggingPlayer = null;
-                window.removeEventListener('mousemove', onDragMove);
-                window.removeEventListener('mouseup', onDragEnd);
-                window.removeEventListener('touchmove', onDragMove);
-                window.removeEventListener('touchend', onDragEnd);
-            }
-
-            document.addEventListener('mousedown', function(e) {
-                var track = e.target.closest('.sap-seek-track');
-                if (!track) return;
-                var player = track.closest('.smart-audio-player');
-                if (!player) return;
-
-                var src = player.getAttribute('data-src');
-                if (activePlayer !== player) {
-                    if (activePlayer) {
                         audio.pause();
-                        resetPlayerUI(activePlayer);
                     }
-                    activePlayer = player;
-                    activeSrc = src;
-                    audio.src = src;
-                    audio.play().catch(function() {});
-                }
+                });
 
-                e.preventDefault();
-                isDragging = true;
-                draggingTrack = track;
-                draggingPlayer = player;
+                // رویدادهای Audio بومی
+                audio.addEventListener('play', function() {
+                    setBtnState('playing');
+                });
 
-                var pct = getScrubPct(track, e.clientX);
-                var pFill = player.querySelector('.sap-progress-fill');
-                var thumb = player.querySelector('.sap-scrub-thumb');
-                var timeCur = player.querySelector('.sap-time-current');
-                if (pFill) pFill.style.width = (pct * 100) + '%';
-                if (thumb) thumb.style.left = (pct * 100) + '%';
-                if (timeCur && audio.duration) {
-                    timeCur.textContent = formatTime(pct * audio.duration);
-                }
+                audio.addEventListener('playing', function() {
+                    setBtnState('playing');
+                });
 
-                window.addEventListener('mousemove', onDragMove);
-                window.addEventListener('mouseup', onDragEnd);
-            });
+                audio.addEventListener('pause', function() {
+                    setBtnState('paused');
+                });
 
-            document.addEventListener('touchstart', function(e) {
-                var track = e.target.closest('.sap-seek-track');
-                if (!track) return;
-                var player = track.closest('.smart-audio-player');
-                if (!player) return;
+                audio.addEventListener('waiting', function() {
+                    setBtnState('loading');
+                });
 
-                var src = player.getAttribute('data-src');
-                if (activePlayer !== player) {
-                    if (activePlayer) {
-                        audio.pause();
-                        resetPlayerUI(activePlayer);
+                audio.addEventListener('loadedmetadata', function() {
+                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                        if (timeDur) timeDur.textContent = formatTime(audio.duration);
                     }
-                    activePlayer = player;
-                    activeSrc = src;
-                    audio.src = src;
-                    audio.play().catch(function() {});
+                });
+
+                audio.addEventListener('durationchange', function() {
+                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                        if (timeDur) timeDur.textContent = formatTime(audio.duration);
+                    }
+                });
+
+                audio.addEventListener('progress', function() {
+                    if (audio.buffered.length > 0 && audio.duration) {
+                        var end = audio.buffered.end(audio.buffered.length - 1);
+                        var pct = Math.min(100, (end / audio.duration) * 100);
+                        if (bFill) bFill.style.width = pct + '%';
+                    }
+                });
+
+                audio.addEventListener('timeupdate', function() {
+                    if (!isDragging) {
+                        var dur = getDuration();
+                        updateProgress(audio.currentTime, dur);
+                    }
+                });
+
+                audio.addEventListener('ended', function() {
+                    setBtnState('paused');
+                    updateProgress(0, getDuration());
+                });
+
+                audio.addEventListener('error', function(err) {
+                    console.error('Audio playback error on', audio.src, err);
+                    setBtnState('paused');
+                    if (timeCur) timeCur.textContent = 'خطا در پخش';
+                });
+
+                // اسکراب و لودبار (کلیک و درگ بسیار نرم عقب و جلو)
+                function seekToClientX(clientX) {
+                    var rect = track.getBoundingClientRect();
+                    var pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                    var dur = getDuration();
+
+                    if (dur > 0) {
+                        var targetTime = pct * dur;
+                        audio.currentTime = targetTime;
+                        updateProgress(targetTime, dur);
+                    } else {
+                        if (pFill) pFill.style.width = (pct * 100) + '%';
+                        if (thumb) thumb.style.left = (pct * 100) + '%';
+                    }
                 }
 
-                isDragging = true;
-                draggingTrack = track;
-                draggingPlayer = player;
-                var clientX = e.touches[0].clientX;
-                var pct = getScrubPct(track, clientX);
-                var pFill = player.querySelector('.sap-progress-fill');
-                var thumb = player.querySelector('.sap-scrub-thumb');
-                if (pFill) pFill.style.width = (pct * 100) + '%';
-                if (thumb) thumb.style.left = (pct * 100) + '%';
+                track.addEventListener('click', function(e) {
+                    seekToClientX(e.clientX);
+                });
 
-                window.addEventListener('touchmove', onDragMove, { passive: false });
-                window.addEventListener('touchend', onDragEnd);
-            }, { passive: true });
+                track.addEventListener('mousedown', function(e) {
+                    isDragging = true;
+                    seekToClientX(e.clientX);
+
+                    function onMouseMove(moveEvt) {
+                        if (!isDragging) return;
+                        seekToClientX(moveEvt.clientX);
+                    }
+                    function onMouseUp(upEvt) {
+                        if (!isDragging) return;
+                        isDragging = false;
+                        window.removeEventListener('mousemove', onMouseMove);
+                        window.removeEventListener('mouseup', onMouseUp);
+                    }
+
+                    window.addEventListener('mousemove', onMouseMove);
+                    window.addEventListener('mouseup', onMouseUp);
+                });
+
+                track.addEventListener('touchstart', function(e) {
+                    if (!e.touches || e.touches.length === 0) return;
+                    isDragging = true;
+                    seekToClientX(e.touches[0].clientX);
+
+                    function onTouchMove(moveEvt) {
+                        if (!isDragging || !moveEvt.touches || moveEvt.touches.length === 0) return;
+                        seekToClientX(moveEvt.touches[0].clientX);
+                    }
+                    function onTouchEnd() {
+                        if (!isDragging) return;
+                        isDragging = false;
+                        window.removeEventListener('touchmove', onTouchMove);
+                        window.removeEventListener('touchend', onTouchEnd);
+                    }
+
+                    window.addEventListener('touchmove', onTouchMove, { passive: true });
+                    window.addEventListener('touchend', onTouchEnd, { passive: true });
+                }, { passive: true });
+            }
+
+            function initAllPlayers() {
+                document.querySelectorAll('.smart-audio-player').forEach(setupPlayer);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAllPlayers);
+            } else {
+                initAllPlayers();
+            }
+
+            // پشتیبانی از لود دینامیک احتمالی
+            window.initSmartAudioPlayers = initAllPlayers;
         })();
     </script>
     <?php

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // auth.php - ماژول مدیریت احراز هویت، سشن و کنترل دسترسی
 
 $config = require __DIR__ . '/config.php';

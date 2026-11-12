@@ -628,7 +628,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                                         <?php foreach ($call['audio_files'] as $f): 
                                             $audio_url = 'play_audio.php?file=' . urlencode($f['path']);
                                             $download_url = $audio_url . '&download=1';
-                                            echo render_smart_audio_player($audio_url, $download_url, '', 'emerald', 'w-64 sm:w-72');
+                                            echo render_smart_audio_player($audio_url, $download_url, '', 'emerald', 'w-64 sm:w-80', $call['billsec']);
                                         ?>
                                         <?php endforeach; ?>
                                     </div>
