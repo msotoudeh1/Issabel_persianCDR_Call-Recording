@@ -252,6 +252,162 @@ function number_type_badge_class($type) {
 }
 
 /**
+ * فرمت‌بندی اندازه فایل به صورت خوانا (KB, MB, GB) با ارقام لاتین
+ */
+function format_bytes($bytes, $precision = 1) {
+    $units = array('B', 'KB', 'MB', 'GB');
+    $bytes = max((int)$bytes, 0);
+    if ($bytes === 0) return '0 B';
+    $pow = floor(log($bytes) / log(1024));
+    $pow = min((int)$pow, count($units) - 1);
+    $bytes /= pow(1024, $pow);
+    return round($bytes, $precision) . ' ' . $units[$pow];
+}
+
+/**
+ * اتصال هوشمند و بسیار سریع رکورد تماس به فایل ضبط‌شده استریسک از طریق UniqueID و تاریخ
+ * پشتیبانی از پوشه‌های ساختار تاریخ YYYY/MM/DD و مسیر مستقیم، به همراه کش درون‌حافظه‌ای دایرکتوری‌ها
+ */
+function resolve_pbx_recording($monitor_dir, $calldate, $uniqueid, $recordingfile = '') {
+    static $resolved_cache = array();
+    static $dir_files_cache = array();
+
+    $cache_key = $uniqueid . '|' . $calldate . '|' . $recordingfile;
+    if (isset($resolved_cache[$cache_key])) {
+        return $resolved_cache[$cache_key];
+    }
+
+    $default_not_found = array(
+        'available'    => false,
+        'filename'     => '',
+        'rel_path'     => '',
+        'full_path'    => '',
+        'filesize'     => 0,
+        'filesize_str' => '—',
+        'format'       => '—',
+        'play_url'     => '',
+        'download_url' => '',
+    );
+
+    $monitor_dir_real = realpath($monitor_dir);
+    if (!$monitor_dir_real || !is_dir($monitor_dir_real)) {
+        $resolved_cache[$cache_key] = $default_not_found;
+        return $default_not_found;
+    }
+
+    $monitor_base = rtrim($monitor_dir_real, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    $allowed_exts = array('wav', 'mp3', 'gsm', 'ogg', 'WAV');
+
+    // تابع کمکی خواندن و کش کردن محتویات دایرکتوری در حافظه
+    $get_dir_files = function($dir_path) use (&$dir_files_cache) {
+        $real = realpath($dir_path);
+        if (!$real || !is_dir($real)) return array();
+        if (isset($dir_files_cache[$real])) return $dir_files_cache[$real];
+        $entries = @scandir($real);
+        $files = array();
+        if ($entries) {
+            foreach ($entries as $e) {
+                if ($e === '.' || $e === '..') continue;
+                $full = $real . DIRECTORY_SEPARATOR . $e;
+                if (is_file($full)) {
+                    $files[] = array(
+                        'name' => $e,
+                        'full' => $full,
+                        'size' => (int)@filesize($full),
+                        'ext'  => strtolower(pathinfo($e, PATHINFO_EXTENSION)),
+                    );
+                }
+            }
+        }
+        $dir_files_cache[$real] = $files;
+        return $files;
+    };
+
+    // ۱. بررسی مستقیم فیلد recordingfile از دیتابیس در صورت وجود
+    if (!empty($recordingfile)) {
+        $clean_rf = str_replace(array("\0", '..', '\\'), '', (string)$recordingfile);
+        $clean_rf = ltrim($clean_rf, '/');
+
+        $test_paths = array(
+            $monitor_base . $clean_rf,
+        );
+        try {
+            $dt = new DateTime($calldate);
+            $test_paths[] = $monitor_base . $dt->format('Y/m/d') . '/' . basename($clean_rf);
+            $test_paths[] = $monitor_base . $dt->format('Y/m/d') . '/' . $clean_rf;
+        } catch (Exception $e) {}
+
+        foreach ($test_paths as $tp) {
+            if (is_file($tp)) {
+                $ext = strtolower(pathinfo($tp, PATHINFO_EXTENSION));
+                if (in_array($ext, $allowed_exts, true)) {
+                    $rel = ltrim(str_replace($monitor_base, '', realpath($tp)), '/\\');
+                    $rel = str_replace('\\', '/', $rel);
+                    $sz = (int)@filesize($tp);
+                    $res = array(
+                        'available'    => true,
+                        'filename'     => basename($tp),
+                        'rel_path'     => $rel,
+                        'full_path'    => $tp,
+                        'filesize'     => $sz,
+                        'filesize_str' => format_bytes($sz),
+                        'format'       => strtoupper($ext),
+                        'play_url'     => 'play_audio.php?file=' . urlencode($rel) . '&type=monitor',
+                        'download_url' => 'play_audio.php?file=' . urlencode($rel) . '&type=monitor&download=1',
+                    );
+                    $resolved_cache[$cache_key] = $res;
+                    return $res;
+                }
+            }
+        }
+    }
+
+    // ۲. تطبیق با استفاده از شناسه یکتا (UniqueID) و ساختار تاریخ YYYY/MM/DD
+    if (!empty($uniqueid)) {
+        $target_dirs = array();
+        try {
+            $dt = new DateTime($calldate);
+            // ساختار سال/ماه/روز
+            $target_dirs[] = $monitor_base . $dt->format('Y/m/d');
+            // در صورتی که تماس در مرز روز ثبت شده باشد، روز قبل و بعد نیز بررسی شوند
+            $dt_prev = (clone $dt)->modify('-1 day');
+            $dt_next = (clone $dt)->modify('+1 day');
+            $target_dirs[] = $monitor_base . $dt_prev->format('Y/m/d');
+            $target_dirs[] = $monitor_base . $dt_next->format('Y/m/d');
+        } catch (Exception $e) {}
+
+        // همچنین ریشه پوشه monitor بررسی شود
+        $target_dirs[] = rtrim($monitor_base, DIRECTORY_SEPARATOR);
+
+        foreach ($target_dirs as $td) {
+            $files_in_dir = $get_dir_files($td);
+            foreach ($files_in_dir as $f) {
+                if (in_array($f['ext'], $allowed_exts, true) && strpos($f['name'], (string)$uniqueid) !== false) {
+                    $rel = ltrim(str_replace($monitor_base, '', $f['full']), '/\\');
+                    $rel = str_replace('\\', '/', $rel);
+                    $res = array(
+                        'available'    => true,
+                        'filename'     => $f['name'],
+                        'rel_path'     => $rel,
+                        'full_path'    => $f['full'],
+                        'filesize'     => $f['size'],
+                        'filesize_str' => format_bytes($f['size']),
+                        'format'       => strtoupper($f['ext']),
+                        'play_url'     => 'play_audio.php?file=' . urlencode($rel) . '&type=monitor',
+                        'download_url' => 'play_audio.php?file=' . urlencode($rel) . '&type=monitor&download=1',
+                    );
+                    $resolved_cache[$cache_key] = $res;
+                    return $res;
+                }
+            }
+        }
+    }
+
+    $resolved_cache[$cache_key] = $default_not_found;
+    return $default_not_found;
+}
+
+/**
  * یافتن فایل صوتی مکالمه
  */
 function find_audio_files($monitor_dir, $calldate, $uniqueid, $recordingfile = '') {
@@ -480,27 +636,34 @@ function render_app_header($active_tab = 'monitoring') {
             <nav class="flex items-center gap-2 pt-3.5 flex-wrap">
                 
                 <a href="monitoring.php"
-                   class="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'monitoring' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'monitoring' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span>داشبورد و شنود مکالمات</span>
+                    <span>داشبورد و مانیتورینگ</span>
                 </a>
 
                 <a href="reports.php"
-                   class="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'reports' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'reports' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span>گزارشات و آمار تفصیلی</span>
+                    <span>گزارشات تفصیلی</span>
+                </a>
+
+                <!-- تب جدید و اختصاصی ضبط مکالمات PBX -->
+                <a href="recordings.php"
+                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'recordings' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
+                    <span>ضبط مکالمات PBX</span>
                 </a>
 
                 <a href="voicemail.php"
-                   class="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'voicemail' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
-                    <span>صندوق صوتی (ویس‌میل)</span>
+                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'voicemail' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span>صندوق صوتی</span>
                 </a>
 
                 <a href="settings.php"
-                   class="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'settings' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'settings' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span>تنظیمات حساب</span>
+                    <span>تنظیمات</span>
                 </a>
 
             </nav>

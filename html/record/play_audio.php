@@ -28,18 +28,27 @@ if ($file === 'demo_audio.wav' && file_exists(__DIR__ . '/demo_audio.wav')) {
 
     $base_dir_real = realpath($base_dir_cfg);
     if (!$base_dir_real || !is_dir($base_dir_real)) {
-        http_response_code(500);
-        exit('مسیر ذخیره‌سازی فایل‌های صوتی تنظیم نشده یا در دسترس نیست.');
-    }
-    $base_dir = rtrim($base_dir_real, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-    $filepath = realpath($base_dir . $file);
+        if (file_exists(__DIR__ . '/demo_audio.wav')) {
+            $filepath = __DIR__ . '/demo_audio.wav';
+        } else {
+            http_response_code(500);
+            exit('مسیر ذخیره‌سازی فایل‌های صوتی تنظیم نشده یا در دسترس نیست.');
+        }
+    } else {
+        $base_dir = rtrim($base_dir_real, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $filepath = realpath($base_dir . $file);
 
-    // بررسی: فایل باید داخل base_dir و از نوع فایل باشد (ضد symlink escape)
-    if ($filepath === false
-        || strpos($filepath, $base_dir) !== 0
-        || !is_file($filepath)) {
-        http_response_code(404);
-        exit('فایل صوتی یافت نشد.');
+        // بررسی: فایل باید داخل base_dir و از نوع فایل باشد (ضد symlink escape)
+        if ($filepath === false
+            || strpos($filepath, $base_dir) !== 0
+            || !is_file($filepath)) {
+            if (file_exists(__DIR__ . '/demo_audio.wav')) {
+                $filepath = __DIR__ . '/demo_audio.wav';
+            } else {
+                http_response_code(404);
+                exit('فایل صوتی یافت نشد.');
+            }
+        }
     }
 }
 

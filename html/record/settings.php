@@ -277,6 +277,13 @@ $current_user = get_auth_username();
                         </div>
 
                         <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">پروتکل دریافت فایل ضبط:</span>
+                            <span class="font-mono text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg" dir="ltr">
+                                <?php echo strtoupper(isset($config['storage_driver']) ? $config['storage_driver'] : 'LOCAL'); ?>
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                             <span class="text-slate-500 dark:text-slate-400 font-medium">مسیر صندوق صوتی:</span>
                             <span class="font-mono text-[11px] text-slate-700 dark:text-slate-300 font-bold" dir="ltr">
                                 <?php echo htmlspecialchars($config['voicemail_dir']); ?>
