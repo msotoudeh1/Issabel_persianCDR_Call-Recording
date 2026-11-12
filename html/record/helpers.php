@@ -947,10 +947,14 @@ function render_app_header($active_tab = 'monitoring') {
             }
         });
 
-        // موتور جامع پلیر صوتی هوشمند با قابلیت درگ/اسکراب لودبار، پرش 5 ثانیه‌ای و کنترل سرعت
-        function initSmartAudioPlayers() {
-            var activeAudio = null;
+        // موتور جامع پلیر صوتی هوشمند مبتنی بر رویدادهای سراسری (Event Delegation) و تک پلیر مرکزی
+        (function() {
+            var audio = new Audio();
             var activePlayer = null;
+            var activeSrc = null;
+            var isDragging = false;
+            var speeds = [1, 1.25, 1.5, 2];
+            var currentSpeedIdx = 0;
 
             function formatTime(sec) {
                 var s = Math.floor(sec || 0);
@@ -959,234 +963,305 @@ function render_app_header($active_tab = 'monitoring') {
                 return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
             }
 
-            document.querySelectorAll('.smart-audio-player').forEach(function(player) {
-                if (player.dataset.initialized) return;
-                player.dataset.initialized = 'true';
-
-                var src = player.getAttribute('data-src');
-                if (!src) return;
-
-                var playBtn = player.querySelector('.sap-play-btn');
+            function setPlayerState(player, isPlaying, isBuffering) {
+                if (!player) return;
                 var playIcon = player.querySelector('.sap-play-icon');
                 var pauseIcon = player.querySelector('.sap-pause-icon');
                 var spinIcon = player.querySelector('.sap-spin-icon');
-                var skipBackBtn = player.querySelector('.sap-skip-back');
-                var skipFwdBtn = player.querySelector('.sap-skip-fwd');
-                var speedBtn = player.querySelector('.sap-speed-btn');
-                var track = player.querySelector('.sap-seek-track');
-                var bufferFill = player.querySelector('.sap-buffer-fill');
-                var progressFill = player.querySelector('.sap-progress-fill');
-                var scrubThumb = player.querySelector('.sap-scrub-thumb');
-                var timeCur = player.querySelector('.sap-time-current');
-                var timeDur = player.querySelector('.sap-time-duration');
 
-                var audio = new Audio();
-                audio.preload = 'metadata';
-                audio.src = src;
-
-                var speeds = [1, 1.25, 1.5, 2];
-                var speedIdx = 0;
-                var isDragging = false;
-
-                function updateProgress(currentTime, duration) {
-                    if (!duration) return;
-                    var pct = Math.max(0, Math.min(100, (currentTime / duration) * 100));
-                    if (progressFill) progressFill.style.width = pct + '%';
-                    if (scrubThumb) scrubThumb.style.left = pct + '%';
-                    if (timeCur) timeCur.textContent = formatTime(currentTime);
+                if (isBuffering) {
+                    if (spinIcon) spinIcon.classList.remove('hidden');
+                    if (playIcon) playIcon.classList.add('hidden');
+                    if (pauseIcon) pauseIcon.classList.add('hidden');
+                } else if (isPlaying) {
+                    if (spinIcon) spinIcon.classList.add('hidden');
+                    if (playIcon) playIcon.classList.add('hidden');
+                    if (pauseIcon) pauseIcon.classList.remove('hidden');
+                } else {
+                    if (spinIcon) spinIcon.classList.add('hidden');
+                    if (playIcon) playIcon.classList.remove('hidden');
+                    if (pauseIcon) pauseIcon.classList.add('hidden');
                 }
+            }
 
-                audio.addEventListener('loadedmetadata', function() {
-                    if (timeDur && audio.duration) timeDur.textContent = formatTime(audio.duration);
-                });
+            function resetPlayerUI(player) {
+                if (!player) return;
+                setPlayerState(player, false, false);
+                var pFill = player.querySelector('.sap-progress-fill');
+                var thumb = player.querySelector('.sap-scrub-thumb');
+                var timeCur = player.querySelector('.sap-time-current');
+                if (pFill) pFill.style.width = '0%';
+                if (thumb) thumb.style.left = '0%';
+                if (timeCur) timeCur.textContent = '00:00';
+            }
 
-                audio.addEventListener('durationchange', function() {
-                    if (timeDur && audio.duration) timeDur.textContent = formatTime(audio.duration);
-                });
+            // رویدادهای هسته Audio
+            audio.addEventListener('loadedmetadata', function() {
+                if (activePlayer && audio.duration) {
+                    var timeDur = activePlayer.querySelector('.sap-time-duration');
+                    if (timeDur) timeDur.textContent = formatTime(audio.duration);
+                }
+            });
 
-                audio.addEventListener('progress', function() {
-                    if (audio.buffered.length > 0 && audio.duration && bufferFill) {
+            audio.addEventListener('durationchange', function() {
+                if (activePlayer && audio.duration) {
+                    var timeDur = activePlayer.querySelector('.sap-time-duration');
+                    if (timeDur) timeDur.textContent = formatTime(audio.duration);
+                }
+            });
+
+            audio.addEventListener('progress', function() {
+                if (activePlayer && audio.buffered.length > 0 && audio.duration) {
+                    var bufferFill = activePlayer.querySelector('.sap-buffer-fill');
+                    if (bufferFill) {
                         var bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
                         var pct = Math.min(100, (bufferedEnd / audio.duration) * 100);
                         bufferFill.style.width = pct + '%';
                     }
-                });
+                }
+            });
 
-                audio.addEventListener('waiting', function() {
-                    if (spinIcon) spinIcon.classList.remove('hidden');
-                    if (playIcon) playIcon.classList.add('hidden');
-                    if (pauseIcon) pauseIcon.classList.add('hidden');
-                });
+            audio.addEventListener('waiting', function() {
+                setPlayerState(activePlayer, false, true);
+            });
 
-                audio.addEventListener('playing', function() {
-                    if (spinIcon) spinIcon.classList.add('hidden');
-                    if (playIcon) playIcon.classList.add('hidden');
-                    if (pauseIcon) pauseIcon.classList.remove('hidden');
-                });
+            audio.addEventListener('playing', function() {
+                setPlayerState(activePlayer, true, false);
+            });
 
-                audio.addEventListener('timeupdate', function() {
-                    if (!isDragging && audio.duration) {
-                        updateProgress(audio.currentTime, audio.duration);
-                    }
-                });
+            audio.addEventListener('pause', function() {
+                setPlayerState(activePlayer, false, false);
+            });
 
-                audio.addEventListener('ended', function() {
-                    if (playIcon) playIcon.classList.remove('hidden');
-                    if (pauseIcon) pauseIcon.classList.add('hidden');
-                    if (spinIcon) spinIcon.classList.add('hidden');
-                    if (progressFill) progressFill.style.width = '0%';
-                    if (scrubThumb) scrubThumb.style.left = '0%';
-                    if (timeCur) timeCur.textContent = '00:00';
-                    if (activeAudio === audio) {
-                        activeAudio = null;
-                        activePlayer = null;
-                    }
-                });
+            audio.addEventListener('timeupdate', function() {
+                if (!isDragging && activePlayer && audio.duration) {
+                    var pFill = activePlayer.querySelector('.sap-progress-fill');
+                    var thumb = activePlayer.querySelector('.sap-scrub-thumb');
+                    var timeCur = activePlayer.querySelector('.sap-time-current');
+                    var pct = Math.max(0, Math.min(100, (audio.currentTime / audio.duration) * 100));
+                    if (pFill) pFill.style.width = pct + '%';
+                    if (thumb) thumb.style.left = pct + '%';
+                    if (timeCur) timeCur.textContent = formatTime(audio.currentTime);
+                }
+            });
 
-                audio.addEventListener('error', function() {
-                    if (playIcon) playIcon.classList.remove('hidden');
-                    if (pauseIcon) pauseIcon.classList.add('hidden');
-                    if (spinIcon) spinIcon.classList.add('hidden');
+            audio.addEventListener('ended', function() {
+                resetPlayerUI(activePlayer);
+                activePlayer = null;
+                activeSrc = null;
+            });
+
+            audio.addEventListener('error', function(err) {
+                console.error('Audio error:', err);
+                if (activePlayer) {
+                    setPlayerState(activePlayer, false, false);
+                    var timeCur = activePlayer.querySelector('.sap-time-current');
                     if (timeCur) timeCur.textContent = 'خطا';
-                });
+                }
+            });
 
+            // مدیریت کلیک با Event Delegation سراسری
+            document.addEventListener('click', function(e) {
+                // ۱. دکمه پخش / مکث
+                var playBtn = e.target.closest('.sap-play-btn');
                 if (playBtn) {
-                    playBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var player = playBtn.closest('.smart-audio-player');
+                    if (!player) return;
+                    var src = player.getAttribute('data-src');
+                    if (!src) return;
 
-                        if (activeAudio && activeAudio !== audio) {
-                            activeAudio.pause();
-                            if (activePlayer) {
-                                var pIcon = activePlayer.querySelector('.sap-play-icon');
-                                var sIcon = activePlayer.querySelector('.sap-pause-icon');
-                                var spIcon = activePlayer.querySelector('.sap-spin-icon');
-                                if (pIcon) pIcon.classList.remove('hidden');
-                                if (sIcon) sIcon.classList.add('hidden');
-                                if (spIcon) spIcon.classList.add('hidden');
-                            }
-                        }
-
+                    // اگر روی همان ردیف کلیک شده
+                    if (activePlayer === player && activeSrc === src) {
                         if (audio.paused) {
-                            var p = audio.play();
-                            if (p !== undefined) {
-                                p.then(function() {
-                                    if (playIcon) playIcon.classList.add('hidden');
-                                    if (pauseIcon) pauseIcon.classList.remove('hidden');
-                                    if (spinIcon) spinIcon.classList.add('hidden');
-                                    activeAudio = audio;
-                                    activePlayer = player;
-                                }).catch(function(err) {});
-                            }
+                            audio.play().catch(function(err) {
+                                console.error('Play error:', err);
+                            });
                         } else {
                             audio.pause();
-                            if (playIcon) playIcon.classList.remove('hidden');
-                            if (pauseIcon) pauseIcon.classList.add('hidden');
-                            if (spinIcon) spinIcon.classList.add('hidden');
                         }
-                    });
+                    } else {
+                        // پخش فایل جدید (ابتدا فایل قبلی ریست شود)
+                        if (activePlayer && activePlayer !== player) {
+                            audio.pause();
+                            resetPlayerUI(activePlayer);
+                        }
+
+                        activePlayer = player;
+                        activeSrc = src;
+                        audio.src = src;
+                        audio.playbackRate = speeds[currentSpeedIdx];
+                        setPlayerState(player, false, true);
+
+                        audio.play().then(function() {
+                            setPlayerState(player, true, false);
+                        }).catch(function(err) {
+                            console.error('Play error:', err);
+                            setPlayerState(player, false, false);
+                        });
+                    }
+                    return;
                 }
 
+                // ۲. دکمه ۵ ثانیه به عقب
+                var skipBackBtn = e.target.closest('.sap-skip-back');
                 if (skipBackBtn) {
-                    skipBackBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var player = skipBackBtn.closest('.smart-audio-player');
+                    if (player && activePlayer === player) {
                         audio.currentTime = Math.max(0, audio.currentTime - 5);
-                        updateProgress(audio.currentTime, audio.duration);
-                    });
+                    }
+                    return;
                 }
 
+                // ۳. دکمه ۵ ثانیه به جلو
+                var skipFwdBtn = e.target.closest('.sap-skip-fwd');
                 if (skipFwdBtn) {
-                    skipFwdBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var player = skipFwdBtn.closest('.smart-audio-player');
+                    if (player && activePlayer === player) {
                         if (audio.duration) {
                             audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
                         } else {
                             audio.currentTime += 5;
                         }
-                        updateProgress(audio.currentTime, audio.duration);
-                    });
+                    }
+                    return;
                 }
 
+                // ۴. دکمه تغییر سرعت پخش
+                var speedBtn = e.target.closest('.sap-speed-btn');
                 if (speedBtn) {
-                    speedBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        speedIdx = (speedIdx + 1) % speeds.length;
-                        var rate = speeds[speedIdx];
-                        audio.playbackRate = rate;
-                        speedBtn.textContent = rate + 'x';
+                    e.preventDefault();
+                    e.stopPropagation();
+                    currentSpeedIdx = (currentSpeedIdx + 1) % speeds.length;
+                    var rate = speeds[currentSpeedIdx];
+                    audio.playbackRate = rate;
+                    document.querySelectorAll('.sap-speed-btn').forEach(function(sb) {
+                        sb.textContent = rate + 'x';
                     });
-                }
-
-                if (track) {
-                    function getTrackPos(e) {
-                        var rect = track.getBoundingClientRect();
-                        var clientX = e.clientX;
-                        if (e.touches && e.touches.length > 0) {
-                            clientX = e.touches[0].clientX;
-                        }
-                        return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                    }
-
-                    function onScrubMove(e) {
-                        if (!isDragging) return;
-                        var pct = getTrackPos(e);
-                        if (progressFill) progressFill.style.width = (pct * 100) + '%';
-                        if (scrubThumb) scrubThumb.style.left = (pct * 100) + '%';
-                        if (timeCur && audio.duration) {
-                            timeCur.textContent = formatTime(pct * audio.duration);
-                        }
-                    }
-
-                    function onScrubEnd(e) {
-                        if (!isDragging) return;
-                        isDragging = false;
-                        var pct = getTrackPos(e);
-                        if (audio.duration) {
-                            audio.currentTime = pct * audio.duration;
-                            updateProgress(audio.currentTime, audio.duration);
-                        }
-                        window.removeEventListener('mousemove', onScrubMove);
-                        window.removeEventListener('mouseup', onScrubEnd);
-                        window.removeEventListener('touchmove', onScrubMove);
-                        window.removeEventListener('touchend', onScrubEnd);
-                    }
-
-                    track.addEventListener('mousedown', function(e) {
-                        e.preventDefault();
-                        isDragging = true;
-                        var pct = getTrackPos(e);
-                        if (progressFill) progressFill.style.width = (pct * 100) + '%';
-                        if (scrubThumb) scrubThumb.style.left = (pct * 100) + '%';
-                        if (timeCur && audio.duration) {
-                            timeCur.textContent = formatTime(pct * audio.duration);
-                        }
-                        window.addEventListener('mousemove', onScrubMove);
-                        window.addEventListener('mouseup', onScrubEnd);
-                    });
-
-                    track.addEventListener('touchstart', function(e) {
-                        isDragging = true;
-                        var pct = getTrackPos(e);
-                        if (progressFill) progressFill.style.width = (pct * 100) + '%';
-                        if (scrubThumb) scrubThumb.style.left = (pct * 100) + '%';
-                        if (timeCur && audio.duration) {
-                            timeCur.textContent = formatTime(pct * audio.duration);
-                        }
-                        window.addEventListener('touchmove', onScrubMove, { passive: false });
-                        window.addEventListener('touchend', onScrubEnd);
-                    }, { passive: true });
+                    return;
                 }
             });
-        }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initSmartAudioPlayers);
-        } else {
-            initSmartAudioPlayers();
-        }
+            // ۵. درگ و اسکراب روی لودبار
+            function getScrubPct(track, clientX) {
+                var rect = track.getBoundingClientRect();
+                return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            }
+
+            var draggingTrack = null;
+            var draggingPlayer = null;
+
+            function onDragMove(e) {
+                if (!isDragging || !draggingTrack || !draggingPlayer) return;
+                var clientX = e.clientX;
+                if (e.touches && e.touches.length > 0) clientX = e.touches[0].clientX;
+                var pct = getScrubPct(draggingTrack, clientX);
+
+                var pFill = draggingPlayer.querySelector('.sap-progress-fill');
+                var thumb = draggingPlayer.querySelector('.sap-scrub-thumb');
+                var timeCur = draggingPlayer.querySelector('.sap-time-current');
+
+                if (pFill) pFill.style.width = (pct * 100) + '%';
+                if (thumb) thumb.style.left = (pct * 100) + '%';
+                if (timeCur && audio.duration) {
+                    timeCur.textContent = formatTime(pct * audio.duration);
+                }
+            }
+
+            function onDragEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                if (draggingTrack && draggingPlayer) {
+                    var clientX = e.clientX;
+                    if (e.changedTouches && e.changedTouches.length > 0) clientX = e.changedTouches[0].clientX;
+                    var pct = getScrubPct(draggingTrack, clientX);
+
+                    if (activePlayer === draggingPlayer && audio.duration) {
+                        audio.currentTime = pct * audio.duration;
+                    }
+                }
+                draggingTrack = null;
+                draggingPlayer = null;
+                window.removeEventListener('mousemove', onDragMove);
+                window.removeEventListener('mouseup', onDragEnd);
+                window.removeEventListener('touchmove', onDragMove);
+                window.removeEventListener('touchend', onDragEnd);
+            }
+
+            document.addEventListener('mousedown', function(e) {
+                var track = e.target.closest('.sap-seek-track');
+                if (!track) return;
+                var player = track.closest('.smart-audio-player');
+                if (!player) return;
+
+                var src = player.getAttribute('data-src');
+                if (activePlayer !== player) {
+                    if (activePlayer) {
+                        audio.pause();
+                        resetPlayerUI(activePlayer);
+                    }
+                    activePlayer = player;
+                    activeSrc = src;
+                    audio.src = src;
+                    audio.play().catch(function() {});
+                }
+
+                e.preventDefault();
+                isDragging = true;
+                draggingTrack = track;
+                draggingPlayer = player;
+
+                var pct = getScrubPct(track, e.clientX);
+                var pFill = player.querySelector('.sap-progress-fill');
+                var thumb = player.querySelector('.sap-scrub-thumb');
+                var timeCur = player.querySelector('.sap-time-current');
+                if (pFill) pFill.style.width = (pct * 100) + '%';
+                if (thumb) thumb.style.left = (pct * 100) + '%';
+                if (timeCur && audio.duration) {
+                    timeCur.textContent = formatTime(pct * audio.duration);
+                }
+
+                window.addEventListener('mousemove', onDragMove);
+                window.addEventListener('mouseup', onDragEnd);
+            });
+
+            document.addEventListener('touchstart', function(e) {
+                var track = e.target.closest('.sap-seek-track');
+                if (!track) return;
+                var player = track.closest('.smart-audio-player');
+                if (!player) return;
+
+                var src = player.getAttribute('data-src');
+                if (activePlayer !== player) {
+                    if (activePlayer) {
+                        audio.pause();
+                        resetPlayerUI(activePlayer);
+                    }
+                    activePlayer = player;
+                    activeSrc = src;
+                    audio.src = src;
+                    audio.play().catch(function() {});
+                }
+
+                isDragging = true;
+                draggingTrack = track;
+                draggingPlayer = player;
+                var clientX = e.touches[0].clientX;
+                var pct = getScrubPct(track, clientX);
+                var pFill = player.querySelector('.sap-progress-fill');
+                var thumb = player.querySelector('.sap-scrub-thumb');
+                if (pFill) pFill.style.width = (pct * 100) + '%';
+                if (thumb) thumb.style.left = (pct * 100) + '%';
+
+                window.addEventListener('touchmove', onDragMove, { passive: false });
+                window.addEventListener('touchend', onDragEnd);
+            }, { passive: true });
+        })();
     </script>
     <?php
 }

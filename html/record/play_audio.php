@@ -3,6 +3,11 @@
 require_once __DIR__ . '/auth.php';
 require_auth(); // الزام ورود کاربر برای پخش یا دانلود هرگونه فایل مکالمه
 
+// آزادسازی قفل سشن برای جلوگیری از مسدود شدن استریم همزمان صوتی در مرورگر
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
+}
+
 $config = require __DIR__ . '/config.php';
 
 if (!isset($_GET['file']) || $_GET['file'] === '') {
