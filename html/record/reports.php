@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // reports.php - گزارش تفصیلی مکالمات ایزابل با شاخص‌های تحلیلی
 // ============================================================
@@ -402,7 +402,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
         <div class="blob blob-3"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
 
         <!-- هدر هماهنگ و یکپارچه -->
         <?php render_app_header('reports'); ?>
@@ -532,7 +532,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
 
         </div>
 
-        <!-- نوار فیلتر و جستجوی کاملاً بالانس و متقارن (۴ ستون هماهنگ) -->
+        <!-- نوار فیلتر و جستجوی کاملاً بالانس و متقارن (4 ستون هماهنگ) -->
         <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 mb-8 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
                 <div class="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -549,10 +549,10 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
 
             <form method="GET" id="filter-form" class="space-y-4">
                 
-                <!-- ردیف اصلی: ۴ ستون کاملاً هم‌اندازه و بالانس شده -->
+                <!-- ردیف اصلی: 4 ستون کاملاً هم‌اندازه و بالانس شده -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                     
-                    <!-- ۱. بازه زمانی -->
+                    <!-- 1. بازه زمانی -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">بازه زمانی</label>
                         <select name="period" id="period-select" onchange="toggleCustomDates(this.value)"
@@ -566,7 +566,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۲. شماره داخلی -->
+                    <!-- 2. شماره داخلی -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">شماره داخلی</label>
                         <select name="extension" class="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl px-4 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition font-mono">
@@ -579,7 +579,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۳. وضعیت تماس -->
+                    <!-- 3. وضعیت تماس -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">وضعیت تماس</label>
                         <select name="disposition" class="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl px-4 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
@@ -592,7 +592,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۴. جستجوی شماره تلفن -->
+                    <!-- 4. جستجوی شماره تلفن -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">جستجو (مبدا / مقصد)</label>
                         <input type="text" name="search_number" placeholder="مثلاً 09121234567" value="<?php echo htmlspecialchars($search_number); ?>"
@@ -643,8 +643,8 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-right border-collapse min-w-[800px]">
                     <thead>
                         <tr class="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
                             <th class="py-4 px-5">تاریخ و ساعت</th>

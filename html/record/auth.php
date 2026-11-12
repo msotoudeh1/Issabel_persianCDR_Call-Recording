@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // auth.php - ماژول مدیریت احراز هویت، سشن و کنترل دسترسی
 
 $config = require __DIR__ . '/config.php';
@@ -23,7 +23,7 @@ function is_authenticated() {
         return true;
     }
 
-    // ۱. بررسی نشست اختصاصی پنل
+    // 1. بررسی نشست اختصاصی پنل
     if (!empty($_SESSION['cdr_logged_in']) && $_SESSION['cdr_logged_in'] === true) {
         $timeout = isset($config['session_timeout']) ? (int)$config['session_timeout'] : 86400;
         if (isset($_SESSION['cdr_last_activity']) && (time() - $_SESSION['cdr_last_activity'] > $timeout)) {
@@ -34,7 +34,7 @@ function is_authenticated() {
         return true;
     }
 
-    // ۲. بررسی نشست خود ایزابل (در صورتی که کاربر قبلاً در ایزابل لاگین کرده باشد)
+    // 2. بررسی نشست خود ایزابل (در صورتی که کاربر قبلاً در ایزابل لاگین کرده باشد)
     if (!empty($_SESSION['issabel_user'])) {
         return true;
     }

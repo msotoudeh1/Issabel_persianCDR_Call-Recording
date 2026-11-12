@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // recordings.php - ماژول مدیریت، آرشیو و شنود ضبط مکالمات PBX (Issabel / Asterisk)
 // ============================================================
@@ -377,9 +377,9 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
         <div class="blob blob-3"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
 
-        <!-- هدر ۲ سطحی استاندارد و بالانس -->
+        <!-- هدر 2 سطحی استاندارد و بالانس -->
         <?php render_app_header('recordings'); ?>
 
         <?php if ($is_demo_mode): ?>
@@ -393,7 +393,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
             </div>
         <?php endif; ?>
 
-        <!-- ۴ کارت آماری KPI متقارن و متوازن -->
+        <!-- 4 کارت آماری KPI متقارن و متوازن -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             
             <!-- کل تماس‌های بررسی شده -->
@@ -454,7 +454,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
 
         </div>
 
-        <!-- نوار فیلتر و جستجوی پیشرفته ۴ ستونه متقارن -->
+        <!-- نوار فیلتر و جستجوی پیشرفته 4 ستونه متقارن -->
         <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 mb-8 shadow-sm">
             
             <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
@@ -474,10 +474,10 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
 
             <form method="GET" id="filter-form" class="space-y-4">
                 
-                <!-- ردیف اصلی فیلترها (۴ ستون کاملاً هم‌تراز با ارتفاع یکسان h-11) -->
+                <!-- ردیف اصلی فیلترها (4 ستون کاملاً هم‌تراز با ارتفاع یکسان h-11) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                     
-                    <!-- ۱. بازه زمانی -->
+                    <!-- 1. بازه زمانی -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">بازه زمانی</label>
                         <select name="period" id="period-select" onchange="toggleCustomDates(this.value)"
@@ -491,7 +491,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۲. وضعیت فایل ضبط -->
+                    <!-- 2. وضعیت فایل ضبط -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">وضعیت فایل ضبط</label>
                         <select name="rec_status"
@@ -502,7 +502,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۳. نوع / جهت تماس -->
+                    <!-- 3. نوع / جهت تماس -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">جهت و نوع تماس</label>
                         <select name="direction"
@@ -514,7 +514,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۴. جستجوی شماره / داخلی -->
+                    <!-- 4. جستجوی شماره / داخلی -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">جستجوی شماره (مبدا / مقصد)</label>
                         <input type="text" name="search_number" placeholder="مثلاً 09189804907 یا 101" value="<?php echo htmlspecialchars($search_number); ?>"
@@ -568,8 +568,8 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-right border-collapse min-w-[820px]">
                     <thead>
                         <tr class="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
                             <th class="py-4 px-5">زمان و تاریخ تماس</th>
@@ -660,40 +660,18 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                                 <?php endif; ?>
                             </td>
 
-                            <!-- پلیر آنلاین و عملیات فایل -->
+                            <!-- پلیر آنلاین هوشمند با کنترل لودبار، جلو/عقب و سرعت پخش -->
                             <td class="py-4 px-5">
                                 <?php if ($has_audio): ?>
-                                    <div class="flex items-center justify-center gap-2">
-                                        <!-- دکمه پخش / مکث -->
-                                        <button type="button" 
-                                                onclick="toggleAudio('audio-<?php echo $row_idx; ?>', 'btn-<?php echo $row_idx; ?>')"
-                                                id="btn-<?php echo $row_idx; ?>"
-                                                class="w-9 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center transition shadow-sm hover:scale-105"
-                                                title="پخش آنلاین مکالمه">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                        </button>
-
-                                        <!-- دکمه دانلود -->
-                                        <a href="<?php echo htmlspecialchars($rec['download_url']); ?>"
-                                           class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition"
-                                           title="دانلود فایل صوتی">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                        </a>
-
-                                        <!-- دکمه جزئیات فنی و UniqueID -->
-                                        <button type="button"
-                                                onclick="openTechModal('<?php echo htmlspecialchars($call['uniqueid']); ?>', '<?php echo htmlspecialchars($rec['filename']); ?>', '<?php echo htmlspecialchars($rec['rel_path']); ?>', '<?php echo htmlspecialchars($rec['filesize_str']); ?>', '<?php echo htmlspecialchars($call['calldate']); ?>')"
-                                                class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition"
-                                                title="اطلاعات فنی و تطبیق UniqueID">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        </button>
-
-                                        <!-- تگ صوتی HTML5 مخفی برای پخش -->
-                                        <audio id="audio-<?php echo $row_idx; ?>" src="<?php echo htmlspecialchars($rec['play_url']); ?>" preload="none"></audio>
+                                    <div class="flex items-center justify-center">
+                                        <?php 
+                                        $tech_btn = '<button type="button" onclick="openTechModal(\''.htmlspecialchars($call['uniqueid']).'\', \''.htmlspecialchars($rec['filename']).'\', \''.htmlspecialchars($rec['rel_path']).'\', \''.htmlspecialchars($rec['filesize_str']).'\', \''.htmlspecialchars($call['calldate']).'\')" class="w-6 sm:w-7 h-6 sm:h-7 rounded-lg bg-white/70 dark:bg-slate-700/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-600 dark:text-slate-300 hover:text-emerald-600 flex items-center justify-center shrink-0 transition" title="اطلاعات فنی و UniqueID"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>';
+                                        echo render_smart_audio_player($rec['play_url'], $rec['download_url'], $tech_btn, 'emerald', 'w-64 sm:w-80');
+                                        ?>
                                     </div>
                                 <?php else: ?>
                                     <div class="flex items-center justify-center text-slate-300 dark:text-slate-700" title="فایل ضبط در دسترس نیست">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+                                        <span class="inline-block text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-3 py-1 rounded-xl">فاقد فایل ضبط</span>
                                     </div>
                                 <?php endif; ?>
                             </td>
@@ -798,52 +776,8 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
         </div>
     </div>
 
-    <!-- اسکریپت کنترل پلیر صوتی و باز و بسته شدن مدال -->
+    <!-- اسکریپت کنترل فیلتر و باز و بسته شدن مودال فنی -->
     <script>
-        var currentPlayingAudio = null;
-        var currentPlayingBtn = null;
-
-        function toggleAudio(audioId, btnId) {
-            var audio = document.getElementById(audioId);
-            var btn = document.getElementById(btnId);
-            if (!audio || !btn) return;
-
-            // توقف صوت در حال پخش قبلی
-            if (currentPlayingAudio && currentPlayingAudio !== audio) {
-                currentPlayingAudio.pause();
-                currentPlayingAudio.currentTime = 0;
-                if (currentPlayingBtn) {
-                    currentPlayingBtn.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-                    currentPlayingBtn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
-                    currentPlayingBtn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-                }
-            }
-
-            if (audio.paused) {
-                audio.play();
-                currentPlayingAudio = audio;
-                currentPlayingBtn = btn;
-                btn.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
-                btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
-                btn.classList.add('bg-amber-500', 'hover:bg-amber-600');
-
-                audio.onended = function() {
-                    btn.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-                    btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
-                    btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-                    currentPlayingAudio = null;
-                    currentPlayingBtn = null;
-                };
-            } else {
-                audio.pause();
-                btn.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-                btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
-                btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-                currentPlayingAudio = null;
-                currentPlayingBtn = null;
-            }
-        }
-
         function toggleCustomDates(val) {
             var container = document.getElementById('custom-date-container');
             if (!container) return;
@@ -875,7 +809,19 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                 m.classList.remove('flex');
             }
         }
+
+        // بستن مودال با کلید Escape و کلیک روی پس‌زمینه
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeTechModal();
+        });
+        document.addEventListener('click', function(e) {
+            var m = document.getElementById('tech-modal');
+            if (m && !m.classList.contains('hidden') && e.target === m) {
+                closeTechModal();
+            }
+        });
     </script>
 
 </body>
 </html>
+

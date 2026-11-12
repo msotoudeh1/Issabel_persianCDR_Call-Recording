@@ -323,7 +323,7 @@ function resolve_pbx_recording($monitor_dir, $calldate, $uniqueid, $recordingfil
         return $files;
     };
 
-    // ۱. بررسی مستقیم فیلد recordingfile از دیتابیس در صورت وجود
+    // 1. بررسی مستقیم فیلد recordingfile از دیتابیس در صورت وجود
     if (!empty($recordingfile)) {
         $clean_rf = str_replace(array("\0", '..', '\\'), '', (string)$recordingfile);
         $clean_rf = ltrim($clean_rf, '/');
@@ -362,7 +362,7 @@ function resolve_pbx_recording($monitor_dir, $calldate, $uniqueid, $recordingfil
         }
     }
 
-    // ۲. تطبیق با استفاده از شناسه یکتا (UniqueID) و ساختار تاریخ YYYY/MM/DD
+    // 2. تطبیق با استفاده از شناسه یکتا (UniqueID) و ساختار تاریخ YYYY/MM/DD
     if (!empty($uniqueid)) {
         $target_dirs = array();
         try {
@@ -558,7 +558,98 @@ function scan_asterisk_voicemails($voicemail_dir) {
 }
 
 /**
- * هدر استاندارد، مدرن و هماهنگ سامانه با ساختار ۲ سطحی کاملاً بالانس شده
+ * ساخت کامپوننت پلیر هوشمند و ریسپانسیو صوتی با کنترل لودبار، جلو/عقب و سرعت پخش
+ */
+function render_smart_audio_player($src, $download_url = '', $extra_html = '', $color = 'emerald', $width_class = 'w-64 sm:w-72') {
+    if (empty($src)) {
+        return '<span class="inline-block text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-3 py-1 rounded-xl">فاقد فایل ضبط</span>';
+    }
+
+    $color_classes = array(
+        'emerald' => array(
+            'btn'      => 'bg-emerald-500 hover:bg-emerald-600',
+            'gradient' => 'from-emerald-500 to-teal-400',
+            'thumb'    => 'border-emerald-500',
+            'hover_bg' => 'hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600 dark:hover:text-emerald-400',
+        ),
+        'purple' => array(
+            'btn'      => 'bg-purple-600 hover:bg-purple-700',
+            'gradient' => 'from-purple-600 to-indigo-500',
+            'thumb'    => 'border-purple-600',
+            'hover_bg' => 'hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400',
+        ),
+        'blue' => array(
+            'btn'      => 'bg-blue-600 hover:bg-blue-700',
+            'gradient' => 'from-blue-600 to-cyan-500',
+            'thumb'    => 'border-blue-600',
+            'hover_bg' => 'hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400',
+        )
+    );
+
+    $cfg = isset($color_classes[$color]) ? $color_classes[$color] : $color_classes['emerald'];
+    $dl_link = !empty($download_url) ? $download_url : ($src . (strpos($src, '?') !== false ? '&download=1' : '?download=1'));
+
+    ob_start();
+    ?>
+    <div class="smart-audio-player flex items-center gap-1.5 sm:gap-2 bg-slate-100/90 dark:bg-slate-800/80 px-2 sm:px-2.5 py-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 <?php echo $width_class; ?> max-w-full shadow-sm select-none" data-src="<?php echo htmlspecialchars($src); ?>">
+        
+        <!-- دکمه پخش / مکث -->
+        <button type="button" class="sap-play-btn w-8 h-8 rounded-xl <?php echo $cfg['btn']; ?> text-white flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-sm" title="پخش / توقف">
+            <svg class="sap-play-icon w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="sap-pause-icon w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            <svg class="sap-spin-icon w-4 h-4 hidden animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+        </button>
+
+        <!-- دکمه 5 ثانیه به عقب -->
+        <button type="button" class="sap-skip-back w-6 sm:w-7 h-6 sm:h-7 rounded-lg text-slate-500 dark:text-slate-400 <?php echo $cfg['hover_bg']; ?> hover:bg-white dark:hover:bg-slate-700/60 flex items-center justify-center shrink-0 transition" title="5 ثانیه به عقب">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg>
+        </button>
+
+        <!-- نوار اسکراب و لودبار (همیشه LTR برای دقت و جهت استاندارد ماوس) -->
+        <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="sap-seek-track w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full cursor-pointer relative overflow-visible select-none group" dir="ltr" title="کلیک یا درگ برای عقب و جلو کردن">
+                <!-- نوار بافر دانلود شده سرور -->
+                <div class="sap-buffer-fill bg-slate-300 dark:bg-slate-600 h-full rounded-full absolute left-0 top-0 transition-all pointer-events-none" style="width: 0%"></div>
+                <!-- نوار پیشرفت پخش -->
+                <div class="sap-progress-fill bg-gradient-to-r <?php echo $cfg['gradient']; ?> h-full rounded-full absolute left-0 top-0 pointer-events-none" style="width: 0%"></div>
+                <!-- دستگیره متحرک لودبار -->
+                <div class="sap-scrub-thumb w-3.5 h-3.5 bg-white dark:bg-slate-100 shadow border-2 <?php echo $cfg['thumb']; ?> rounded-full absolute top-1/2 -translate-y-1/2 -ml-1.5 transition-transform pointer-events-none group-hover:scale-125" style="left: 0%"></div>
+            </div>
+            
+            <!-- زمان سپری شده و کل زمان مکالمه -->
+            <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono mt-1 select-none" dir="ltr">
+                <span class="sap-time-current">00:00</span>
+                <span class="sap-time-duration">--:--</span>
+            </div>
+        </div>
+
+        <!-- دکمه 5 ثانیه به جلو -->
+        <button type="button" class="sap-skip-fwd w-6 sm:w-7 h-6 sm:h-7 rounded-lg text-slate-500 dark:text-slate-400 <?php echo $cfg['hover_bg']; ?> hover:bg-white dark:hover:bg-slate-700/60 flex items-center justify-center shrink-0 transition" title="5 ثانیه به جلو">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.934 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 005 8v8a1 1 0 001.6.8l5.334-4zM19.934 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.334-4z"/></svg>
+        </button>
+
+        <!-- دکمه تغییر سرعت پخش -->
+        <button type="button" class="sap-speed-btn h-6 sm:h-7 px-1.5 rounded-lg bg-white/70 dark:bg-slate-700/60 <?php echo $cfg['hover_bg']; ?> text-slate-600 dark:text-slate-300 text-[10px] font-bold font-mono shrink-0 transition" title="سرعت پخش (1x, 1.25x, 1.5x, 2x)">
+            1x
+        </button>
+
+        <!-- دکمه دانلود فایل -->
+        <?php if (!empty($dl_link)): ?>
+            <a href="<?php echo htmlspecialchars($dl_link); ?>" class="w-6 sm:w-7 h-6 sm:h-7 rounded-lg bg-white/70 dark:bg-slate-700/60 <?php echo $cfg['hover_bg']; ?> text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 transition" title="دانلود فایل صوتی">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </a>
+        <?php endif; ?>
+
+        <!-- دکمه‌های اختیاری بیشتر (مانند مودال فنی) -->
+        <?php if (!empty($extra_html)) echo $extra_html; ?>
+
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * هدر استاندارد، مدرن و هماهنگ سامانه با ساختار 2 سطحی کاملاً بالانس شده
  */
 function render_app_header($active_tab = 'monitoring') {
     $username = get_auth_username();
@@ -567,22 +658,31 @@ function render_app_header($active_tab = 'monitoring') {
     $today_shamsi = gregorian_to_jalali((int)$p[0], (int)$p[1], (int)$p[2]);
     $csrf = get_csrf_token();
     ?>
-    <header class="mb-8">
-        <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-5 shadow-sm transition-all duration-300">
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.55); }
+    </style>
+
+    <header class="mb-6 sm:mb-8">
+        <div class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-4 sm:p-5 shadow-sm transition-all duration-300">
             
-            <!-- سطر اول: هویت بصری، وضعیت آنلاین، ساعت و کنترل‌های حساب (کاملاً متقارن) -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+            <!-- سطر اول: هویت بصری، وضعیت آنلاین، ساعت و کنترل‌های حساب (کاملاً ریسپانسیو) -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-4 border-b border-slate-100 dark:border-slate-800/80">
                 
                 <!-- سمت راست: نشان و عنوان اختصاصی سامانه -->
-                <div class="flex items-center gap-3.5">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 flex items-center justify-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/>
                         </svg>
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-base sm:text-lg font-black text-slate-800 dark:text-white tracking-tight">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-sm sm:text-base md:text-lg font-black text-slate-800 dark:text-white tracking-tight">
                                 سامانه هوشمند مانیتورینگ ایزابل
                             </span>
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
@@ -594,7 +694,7 @@ function render_app_header($active_tab = 'monitoring') {
                 </div>
 
                 <!-- سمت چپ: تقویم و ساعت، تغییر تم، دکمه سریع تغییر رمز و خروج -->
-                <div class="flex items-center gap-2.5 flex-wrap">
+                <div class="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
                     
                     <!-- ویجت تاریخ و ساعت زنده (با ارقام لاتین) -->
                     <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 rounded-2xl px-3 py-1.5 text-xs font-mono">
@@ -632,36 +732,36 @@ function render_app_header($active_tab = 'monitoring') {
 
             </div>
 
-            <!-- سطر دوم: ناوبری تب‌های اصلی (طراحی متقارن، وسیع و بدون تداخل با ساعت) -->
-            <nav class="flex items-center gap-2 pt-3.5 flex-wrap">
+            <!-- سطر دوم: ناوبری تب‌های اصلی (اسکرول افقی نرم در موبایل، بدون شکستن ناموزون سطرها) -->
+            <nav class="flex items-center gap-1.5 sm:gap-2 pt-3.5 overflow-x-auto no-scrollbar scroll-smooth flex-nowrap sm:flex-wrap pb-1">
                 
                 <a href="monitoring.php"
-                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'monitoring' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'monitoring' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     <span>داشبورد و مانیتورینگ</span>
                 </a>
 
                 <a href="reports.php"
-                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'reports' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'reports' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>گزارشات تفصیلی</span>
                 </a>
 
                 <!-- تب جدید و اختصاصی ضبط مکالمات PBX -->
                 <a href="recordings.php"
-                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'recordings' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'recordings' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
                     <span>ضبط مکالمات PBX</span>
                 </a>
 
                 <a href="voicemail.php"
-                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'voicemail' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'voicemail' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     <span>صندوق صوتی</span>
                 </a>
 
                 <a href="settings.php"
-                   class="flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'settings' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
+                   class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all <?php echo $active_tab === 'settings' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'; ?>">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     <span>تنظیمات</span>
                 </a>
@@ -835,6 +935,258 @@ function render_app_header($active_tab = 'monitoring') {
                 window.dispatchEvent(new Event('themechanged'));
             });
         })();
+
+        // بستن مودال تغییر مشخصات با کلید Escape و کلیک روی پس‌زمینه
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeCredsModal();
+        });
+        document.addEventListener('click', function(e) {
+            var modal = document.getElementById('creds-modal');
+            if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+                closeCredsModal();
+            }
+        });
+
+        // موتور جامع پلیر صوتی هوشمند با قابلیت درگ/اسکراب لودبار، پرش 5 ثانیه‌ای و کنترل سرعت
+        function initSmartAudioPlayers() {
+            var activeAudio = null;
+            var activePlayer = null;
+
+            function formatTime(sec) {
+                var s = Math.floor(sec || 0);
+                var m = Math.floor(s / 60);
+                s = s % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            document.querySelectorAll('.smart-audio-player').forEach(function(player) {
+                if (player.dataset.initialized) return;
+                player.dataset.initialized = 'true';
+
+                var src = player.getAttribute('data-src');
+                if (!src) return;
+
+                var playBtn = player.querySelector('.sap-play-btn');
+                var playIcon = player.querySelector('.sap-play-icon');
+                var pauseIcon = player.querySelector('.sap-pause-icon');
+                var spinIcon = player.querySelector('.sap-spin-icon');
+                var skipBackBtn = player.querySelector('.sap-skip-back');
+                var skipFwdBtn = player.querySelector('.sap-skip-fwd');
+                var speedBtn = player.querySelector('.sap-speed-btn');
+                var track = player.querySelector('.sap-seek-track');
+                var bufferFill = player.querySelector('.sap-buffer-fill');
+                var progressFill = player.querySelector('.sap-progress-fill');
+                var scrubThumb = player.querySelector('.sap-scrub-thumb');
+                var timeCur = player.querySelector('.sap-time-current');
+                var timeDur = player.querySelector('.sap-time-duration');
+
+                var audio = new Audio();
+                audio.preload = 'metadata';
+                audio.src = src;
+
+                var speeds = [1, 1.25, 1.5, 2];
+                var speedIdx = 0;
+                var isDragging = false;
+
+                function updateProgress(currentTime, duration) {
+                    if (!duration) return;
+                    var pct = Math.max(0, Math.min(100, (currentTime / duration) * 100));
+                    if (progressFill) progressFill.style.width = pct + '%';
+                    if (scrubThumb) scrubThumb.style.left = pct + '%';
+                    if (timeCur) timeCur.textContent = formatTime(currentTime);
+                }
+
+                audio.addEventListener('loadedmetadata', function() {
+                    if (timeDur && audio.duration) timeDur.textContent = formatTime(audio.duration);
+                });
+
+                audio.addEventListener('durationchange', function() {
+                    if (timeDur && audio.duration) timeDur.textContent = formatTime(audio.duration);
+                });
+
+                audio.addEventListener('progress', function() {
+                    if (audio.buffered.length > 0 && audio.duration && bufferFill) {
+                        var bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+                        var pct = Math.min(100, (bufferedEnd / audio.duration) * 100);
+                        bufferFill.style.width = pct + '%';
+                    }
+                });
+
+                audio.addEventListener('waiting', function() {
+                    if (spinIcon) spinIcon.classList.remove('hidden');
+                    if (playIcon) playIcon.classList.add('hidden');
+                    if (pauseIcon) pauseIcon.classList.add('hidden');
+                });
+
+                audio.addEventListener('playing', function() {
+                    if (spinIcon) spinIcon.classList.add('hidden');
+                    if (playIcon) playIcon.classList.add('hidden');
+                    if (pauseIcon) pauseIcon.classList.remove('hidden');
+                });
+
+                audio.addEventListener('timeupdate', function() {
+                    if (!isDragging && audio.duration) {
+                        updateProgress(audio.currentTime, audio.duration);
+                    }
+                });
+
+                audio.addEventListener('ended', function() {
+                    if (playIcon) playIcon.classList.remove('hidden');
+                    if (pauseIcon) pauseIcon.classList.add('hidden');
+                    if (spinIcon) spinIcon.classList.add('hidden');
+                    if (progressFill) progressFill.style.width = '0%';
+                    if (scrubThumb) scrubThumb.style.left = '0%';
+                    if (timeCur) timeCur.textContent = '00:00';
+                    if (activeAudio === audio) {
+                        activeAudio = null;
+                        activePlayer = null;
+                    }
+                });
+
+                audio.addEventListener('error', function() {
+                    if (playIcon) playIcon.classList.remove('hidden');
+                    if (pauseIcon) pauseIcon.classList.add('hidden');
+                    if (spinIcon) spinIcon.classList.add('hidden');
+                    if (timeCur) timeCur.textContent = 'خطا';
+                });
+
+                if (playBtn) {
+                    playBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        if (activeAudio && activeAudio !== audio) {
+                            activeAudio.pause();
+                            if (activePlayer) {
+                                var pIcon = activePlayer.querySelector('.sap-play-icon');
+                                var sIcon = activePlayer.querySelector('.sap-pause-icon');
+                                var spIcon = activePlayer.querySelector('.sap-spin-icon');
+                                if (pIcon) pIcon.classList.remove('hidden');
+                                if (sIcon) sIcon.classList.add('hidden');
+                                if (spIcon) spIcon.classList.add('hidden');
+                            }
+                        }
+
+                        if (audio.paused) {
+                            var p = audio.play();
+                            if (p !== undefined) {
+                                p.then(function() {
+                                    if (playIcon) playIcon.classList.add('hidden');
+                                    if (pauseIcon) pauseIcon.classList.remove('hidden');
+                                    if (spinIcon) spinIcon.classList.add('hidden');
+                                    activeAudio = audio;
+                                    activePlayer = player;
+                                }).catch(function(err) {});
+                            }
+                        } else {
+                            audio.pause();
+                            if (playIcon) playIcon.classList.remove('hidden');
+                            if (pauseIcon) pauseIcon.classList.add('hidden');
+                            if (spinIcon) spinIcon.classList.add('hidden');
+                        }
+                    });
+                }
+
+                if (skipBackBtn) {
+                    skipBackBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        audio.currentTime = Math.max(0, audio.currentTime - 5);
+                        updateProgress(audio.currentTime, audio.duration);
+                    });
+                }
+
+                if (skipFwdBtn) {
+                    skipFwdBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (audio.duration) {
+                            audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+                        } else {
+                            audio.currentTime += 5;
+                        }
+                        updateProgress(audio.currentTime, audio.duration);
+                    });
+                }
+
+                if (speedBtn) {
+                    speedBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        speedIdx = (speedIdx + 1) % speeds.length;
+                        var rate = speeds[speedIdx];
+                        audio.playbackRate = rate;
+                        speedBtn.textContent = rate + 'x';
+                    });
+                }
+
+                if (track) {
+                    function getTrackPos(e) {
+                        var rect = track.getBoundingClientRect();
+                        var clientX = e.clientX;
+                        if (e.touches && e.touches.length > 0) {
+                            clientX = e.touches[0].clientX;
+                        }
+                        return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                    }
+
+                    function onScrubMove(e) {
+                        if (!isDragging) return;
+                        var pct = getTrackPos(e);
+                        if (progressFill) progressFill.style.width = (pct * 100) + '%';
+                        if (scrubThumb) scrubThumb.style.left = (pct * 100) + '%';
+                        if (timeCur && audio.duration) {
+                            timeCur.textContent = formatTime(pct * audio.duration);
+                        }
+                    }
+
+                    function onScrubEnd(e) {
+                        if (!isDragging) return;
+                        isDragging = false;
+                        var pct = getTrackPos(e);
+                        if (audio.duration) {
+                            audio.currentTime = pct * audio.duration;
+                            updateProgress(audio.currentTime, audio.duration);
+                        }
+                        window.removeEventListener('mousemove', onScrubMove);
+                        window.removeEventListener('mouseup', onScrubEnd);
+                        window.removeEventListener('touchmove', onScrubMove);
+                        window.removeEventListener('touchend', onScrubEnd);
+                    }
+
+                    track.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                        isDragging = true;
+                        var pct = getTrackPos(e);
+                        if (progressFill) progressFill.style.width = (pct * 100) + '%';
+                        if (scrubThumb) scrubThumb.style.left = (pct * 100) + '%';
+                        if (timeCur && audio.duration) {
+                            timeCur.textContent = formatTime(pct * audio.duration);
+                        }
+                        window.addEventListener('mousemove', onScrubMove);
+                        window.addEventListener('mouseup', onScrubEnd);
+                    });
+
+                    track.addEventListener('touchstart', function(e) {
+                        isDragging = true;
+                        var pct = getTrackPos(e);
+                        if (progressFill) progressFill.style.width = (pct * 100) + '%';
+                        if (scrubThumb) scrubThumb.style.left = (pct * 100) + '%';
+                        if (timeCur && audio.duration) {
+                            timeCur.textContent = formatTime(pct * audio.duration);
+                        }
+                        window.addEventListener('touchmove', onScrubMove, { passive: false });
+                        window.addEventListener('touchend', onScrubEnd);
+                    }, { passive: true });
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSmartAudioPlayers);
+        } else {
+            initSmartAudioPlayers();
+        }
     </script>
     <?php
 }

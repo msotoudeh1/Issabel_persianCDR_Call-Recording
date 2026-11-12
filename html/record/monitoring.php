@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // monitoring.php - داشبورد پیشرفته مانیتورینگ، آنالیز و شنود مکالمات
 // ============================================================
@@ -359,7 +359,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
         <div class="blob blob-3"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
 
         <!-- هدر یکپارچه و مدرن سامانه -->
         <?php render_app_header('monitoring'); ?>
@@ -472,7 +472,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
             </div>
         </div>
 
-        <!-- نوار فیلتر و جستجوی کاملاً بالانس و متقارن (۴ ستون هماهنگ) -->
+        <!-- نوار فیلتر و جستجوی کاملاً بالانس و متقارن (4 ستون هماهنگ) -->
         <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 mb-8 shadow-sm">
             <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
                 <div class="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -488,10 +488,10 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
 
             <form method="GET" id="filter-form" class="space-y-4">
                 
-                <!-- ردیف اصلی: ۴ ستون کاملاً هم‌اندازه و بالانس شده -->
+                <!-- ردیف اصلی: 4 ستون کاملاً هم‌اندازه و بالانس شده -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                     
-                    <!-- ۱. سلکتور ساده و یکپارچه بازه زمانی -->
+                    <!-- 1. سلکتور ساده و یکپارچه بازه زمانی -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">بازه زمانی</label>
                         <select name="period" id="period-select" onchange="toggleCustomDates(this.value)"
@@ -505,7 +505,7 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۲. شماره داخلی -->
+                    <!-- 2. شماره داخلی -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">شماره داخلی</label>
                         <select name="extension" class="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl px-4 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition font-mono">
@@ -518,14 +518,14 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                         </select>
                     </div>
 
-                    <!-- ۳. جستجوی شماره تلفن -->
+                    <!-- 3. جستجوی شماره تلفن -->
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">جستجوی شماره تلفن</label>
                         <input type="text" name="search_number" placeholder="مثلاً 09121234567" value="<?php echo htmlspecialchars($search_number); ?>"
                                class="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl px-4 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition font-mono">
                     </div>
 
-                    <!-- ۴. دکمه‌ها با همان ارتفاع یکسان (h-11) -->
+                    <!-- 4. دکمه‌ها با همان ارتفاع یکسان (h-11) -->
                     <div class="flex items-center gap-2">
                         <button type="submit" class="flex-1 h-11 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-bold rounded-2xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
@@ -569,8 +569,8 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-right border-collapse min-w-[820px]">
                     <thead>
                         <tr class="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
                             <th class="py-4 px-5">تاریخ و ساعت</th>
@@ -628,27 +628,8 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                                         <?php foreach ($call['audio_files'] as $f): 
                                             $audio_url = 'play_audio.php?file=' . urlencode($f['path']);
                                             $download_url = $audio_url . '&download=1';
+                                            echo render_smart_audio_player($audio_url, $download_url, '', 'emerald', 'w-64 sm:w-72');
                                         ?>
-                                            <div class="custom-audio-player flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 w-64 shadow-sm" data-src="<?php echo $audio_url; ?>">
-                                                <button type="button" class="play-btn w-8 h-8 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-sm" title="پخش / توقف">
-                                                    <svg class="play-icon w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                                    <svg class="pause-icon w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                                                </button>
-
-                                                <div class="flex-1 flex flex-col justify-center">
-                                                    <div class="progress-bar w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full cursor-pointer relative overflow-hidden">
-                                                        <div class="progress-fill bg-emerald-500 h-full w-0 transition-all duration-100"></div>
-                                                    </div>
-                                                    <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-1" dir="ltr">
-                                                        <span class="time-current">00:00</span>
-                                                        <span class="time-duration">--:--</span>
-                                                    </div>
-                                                </div>
-
-                                                <a href="<?php echo $download_url; ?>" class="w-8 h-8 rounded-xl bg-white dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-500 hover:text-emerald-600 dark:text-slate-300 flex items-center justify-center shrink-0 transition-colors shadow-sm" title="دانلود فایل صوتی">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                                </a>
-                                            </div>
                                         <?php endforeach; ?>
                                     </div>
                                 <?php else: ?>
@@ -880,82 +861,6 @@ function build_qs($params) { return htmlspecialchars(http_build_query($params), 
                 .catch(err => console.error(err));
         });
     });
-
-    (function() {
-        var currentAudio = null;
-        var currentActivePlayer = null;
-
-        function formatTime(seconds) {
-            var s = Math.floor(seconds || 0);
-            var m = Math.floor(s / 60);
-            s = s % 60;
-            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        }
-
-        document.querySelectorAll('.custom-audio-player').forEach(function(player) {
-            var src = player.getAttribute('data-src');
-            var btn = player.querySelector('.play-btn');
-            var playIcon = player.querySelector('.play-icon');
-            var pauseIcon = player.querySelector('.pause-icon');
-            var pBar = player.querySelector('.progress-bar');
-            var pFill = player.querySelector('.progress-fill');
-            var timeCur = player.querySelector('.time-current');
-            var timeDur = player.querySelector('.time-duration');
-
-            var audio = new Audio();
-            audio.preload = 'metadata';
-            audio.src = src;
-
-            audio.addEventListener('loadedmetadata', function() {
-                timeDur.textContent = formatTime(audio.duration);
-            });
-
-            audio.addEventListener('timeupdate', function() {
-                if (audio.duration) {
-                    var pct = (audio.currentTime / audio.duration) * 100;
-                    pFill.style.width = pct + '%';
-                    timeCur.textContent = formatTime(audio.currentTime);
-                }
-            });
-
-            audio.addEventListener('ended', function() {
-                playIcon.classList.remove('hidden');
-                pauseIcon.classList.add('hidden');
-                pFill.style.width = '0%';
-                timeCur.textContent = '00:00';
-            });
-
-            btn.addEventListener('click', function() {
-                if (currentAudio && currentAudio !== audio) {
-                    currentAudio.pause();
-                    if (currentActivePlayer) {
-                        currentActivePlayer.querySelector('.play-icon').classList.remove('hidden');
-                        currentActivePlayer.querySelector('.pause-icon').classList.add('hidden');
-                    }
-                }
-
-                if (audio.paused) {
-                    audio.play();
-                    playIcon.classList.add('hidden');
-                    pauseIcon.classList.remove('hidden');
-                    currentAudio = audio;
-                    currentActivePlayer = player;
-                } else {
-                    audio.pause();
-                    playIcon.classList.remove('hidden');
-                    pauseIcon.classList.add('hidden');
-                }
-            });
-
-            pBar.addEventListener('click', function(e) {
-                var rect = pBar.getBoundingClientRect();
-                var clickPos = (e.clientX - rect.left) / rect.width;
-                if (audio.duration) {
-                    audio.currentTime = clickPos * audio.duration;
-                }
-            });
-        });
-    })();
     </script>
 </body>
 </html>

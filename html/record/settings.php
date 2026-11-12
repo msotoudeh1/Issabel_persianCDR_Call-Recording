@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // settings.php - تنظیمات حساب کاربری و وضعیت سامانه
 // ============================================================
@@ -155,7 +155,7 @@ $current_user = get_auth_username();
         <div class="blob blob-3"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
 
         <!-- هدر هماهنگ و یکپارچه -->
         <?php render_app_header('settings'); ?>
@@ -177,7 +177,7 @@ $current_user = get_auth_username();
         <!-- دو ستون تنظیمات و وضعیت -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <!-- کارت فرم تغییر نام کاربری و رمز عبور (۲ ستون) -->
+            <!-- کارت فرم تغییر نام کاربری و رمز عبور (2 ستون) -->
             <div class="lg:col-span-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-sm">
 
                 <div class="flex items-center gap-3 pb-5 mb-6 border-b border-slate-100 dark:border-slate-800">
@@ -241,7 +241,7 @@ $current_user = get_auth_username();
 
             </div>
 
-            <!-- کارت وضعیت زیرساخت و ایزابل (۱ ستون) -->
+            <!-- کارت وضعیت زیرساخت و ایزابل (1 ستون) -->
             <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center gap-3 pb-5 mb-6 border-b border-slate-100 dark:border-slate-800">
